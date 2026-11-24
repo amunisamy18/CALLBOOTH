@@ -1,0 +1,24 @@
+{
+  "name": "togetherbooth",
+  "version": "2.0.0",
+  "description": "Private two-person virtual photo booth",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test/smoke.js",
+    "lint": "echo 'No linter configured'"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.7.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

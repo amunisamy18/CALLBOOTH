@@ -1,0 +1,2227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="TogetherBooth — A private photo booth for two people">
+<title>TogetherBooth 📸</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📸</text></svg>" type="image/svg+xml">
+<meta name="theme-color" content="#f06292">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM
+════════════════════════════════════════════ */
+:root {
+  --pink: #f06292;
+  --pink-light: #f8bbd0;
+  --pink-dark: #c2185b;
+  --lavender: #9c88ff;
+  --lavender-light: #e8e3ff;
+  --peach: #ffb347;
+  --cream: #fff9f0;
+  --white: #ffffff;
+  --text: #3d2040;
+  --text-muted: #7a6080;
+  --border: rgba(240,98,146,.2);
+  --card-bg: rgba(255,255,255,.75);
+  --card-border: rgba(255,182,193,.3);
+  --shadow: 0 8px 32px rgba(240,98,146,.15);
+  --shadow-lg: 0 16px 48px rgba(156,136,255,.2);
+  --bg-grad: linear-gradient(135deg,#fff0f8 0%,#f3e8ff 40%,#fff3e0 100%);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --radius-lg: 28px;
+  --transition: .2s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] {
+  --pink: #f48fb1;
+  --pink-light: #ad1457;
+  --pink-dark: #f8bbd0;
+  --lavender: #b39ddb;
+  --lavender-light: #311b5a;
+  --cream: #1a0d2b;
+  --white: #2d1b4e;
+  --text: #f8e8ff;
+  --text-muted: #c9a8dd;
+  --border: rgba(180,100,220,.25);
+  --card-bg: rgba(50,20,80,.8);
+  --card-border: rgba(180,100,220,.25);
+  --shadow: 0 8px 32px rgba(0,0,0,.4);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.5);
+  --bg-grad: linear-gradient(135deg,#1a0d2b 0%,#2a1550 40%,#1f1020 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',system-ui,sans-serif;color:var(--text);background:var(--bg-grad);min-height:100vh;transition:background var(--transition),color var(--transition)}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--pink-light);border-radius:3px}
+
+/* ── Typography ── */
+h1,h2,h3{font-weight:800;line-height:1.2}
+.font-pacifico{font-family:'Pacifico',cursive}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;font:700 .9rem 'Nunito',sans-serif;border:none;border-radius:50px;padding:10px 20px;cursor:pointer;transition:all var(--transition);white-space:nowrap;user-select:none}
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn-primary{background:linear-gradient(135deg,var(--pink),var(--lavender));color:#fff;box-shadow:0 4px 15px rgba(240,98,146,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(240,98,146,.5)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--card-bg);color:var(--text);border:1.5px solid var(--border);backdrop-filter:blur(10px)}
+.btn-secondary:hover{background:var(--pink-light);color:var(--pink-dark);border-color:var(--pink)}
+.btn-danger{background:linear-gradient(135deg,#f44336,#e91e63);color:#fff}
+.btn-danger:hover{box-shadow:0 4px 15px rgba(244,67,54,.4);transform:translateY(-2px)}
+.btn-icon{padding:10px;border-radius:50%;aspect-ratio:1;width:42px;height:42px;justify-content:center;font-size:1.1rem}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.btn-active{background:linear-gradient(135deg,var(--pink-dark),#7b1fa2)!important;color:#fff!important}
+
+/* ── Cards ── */
+.card{background:var(--card-bg);backdrop-filter:blur(16px);border:1.5px solid var(--card-border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:background var(--transition)}
+.card-hover:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);transition:all .3s ease}
+
+/* ── Inputs ── */
+input,textarea,select{font:inherit;background:var(--card-bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);width:100%;transition:border-color var(--transition);backdrop-filter:blur(10px)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 3px rgba(240,98,146,.15)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+
+/* ── Layout ── */
+.hide{display:none!important}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.w-full{width:100%}
+.text-center{text-align:center}
+.mt-1{margin-top:4px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}
+.p-3{padding:12px}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--pink),var(--lavender));color:#fff;border-radius:50px;padding:2px 10px;font-size:.75rem;font-weight:700}
+.tag{display:inline-block;background:var(--lavender-light);color:var(--lavender);border-radius:50px;padding:2px 10px;font-size:.75rem;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:#aaa;display:inline-block;transition:background .3s}
+.dot.online{background:#4caf50;box-shadow:0 0 6px #4caf5080}
+.dot.offline{background:#9e9e9e}
+
+/* ═══════════════════════════════════════════
+   AUTH PAGE
+════════════════════════════════════════════ */
+#auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.auth-card{width:100%;max-width:420px}
+.auth-logo{font-size:3rem;text-align:center;margin-bottom:8px}
+.auth-title{font-size:2rem;text-align:center;background:linear-gradient(135deg,var(--pink),var(--lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.auth-subtitle{text-align:center;color:var(--text-muted);margin-bottom:24px;font-size:.9rem}
+.auth-tabs{display:flex;gap:4px;background:rgba(0,0,0,.05);border-radius:50px;padding:4px;margin-bottom:20px}
+.auth-tab{flex:1;text-align:center;padding:8px;border-radius:50px;cursor:pointer;font-weight:700;transition:all var(--transition);color:var(--text-muted)}
+.auth-tab.active{background:linear-gradient(135deg,var(--pink),var(--lavender));color:#fff}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-weight:700;font-size:.85rem;margin-bottom:6px;color:var(--text-muted)}
+.error-msg{color:#e53e3e;font-size:.85rem;min-height:20px;margin-top:8px;font-weight:600}
+.invite-hint{font-size:.8rem;color:var(--text-muted);margin-top:6px;padding:8px 12px;background:var(--lavender-light);border-radius:var(--radius-sm)}
+
+/* ═══════════════════════════════════════════
+   MAIN APP LAYOUT
+════════════════════════════════════════════ */
+#app{min-height:100vh;display:flex;flex-direction:column}
+.top-bar{background:var(--card-bg);backdrop-filter:blur(16px);border-bottom:1.5px solid var(--card-border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.top-bar-logo{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.top-bar-actions{display:flex;align-items:center;gap:8px}
+.user-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:#fff}
+.conn-badge{font-size:.75rem;padding:4px 10px;border-radius:50px;font-weight:700}
+.conn-badge.connected{background:#e8f5e9;color:#2e7d32}
+.conn-badge.disconnected{background:#ffebee;color:#c62828}
+[data-theme="dark"] .conn-badge.connected{background:#1b5e20;color:#a5d6a7}
+[data-theme="dark"] .conn-badge.disconnected{background:#b71c1c;color:#ffcdd2}
+
+/* Nav tabs */
+.nav-tabs{display:flex;gap:4px;padding:8px 20px;background:var(--card-bg);border-bottom:1.5px solid var(--card-border);overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:8px 16px;border-radius:50px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all var(--transition);color:var(--text-muted);white-space:nowrap;border:none;background:none}
+.nav-tab:hover{background:var(--lavender-light);color:var(--lavender)}
+.nav-tab.active{background:linear-gradient(135deg,var(--pink),var(--lavender));color:#fff}
+
+.content{flex:1;padding:16px 20px;max-width:1400px;margin:0 auto;width:100%}
+
+/* ═══════════════════════════════════════════
+   VIDEO CALL
+════════════════════════════════════════════ */
+.video-stage{position:relative;background:#000;border-radius:var(--radius);overflow:hidden;aspect-ratio:16/9;max-height:400px}
+#remote-video{width:100%;height:100%;object-fit:cover}
+#local-video{position:absolute;bottom:12px;right:12px;width:28%;max-width:180px;border-radius:var(--radius-sm);border:2px solid rgba(255,255,255,.6);object-fit:cover;aspect-ratio:4/3;background:#111}
+.countdown-overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:clamp(60px,15vw,140px);color:#fff;text-shadow:0 0 30px #000a,0 0 60px var(--pink);pointer-events:none;font-weight:800;animation:countPulse .5s ease-in-out}
+@keyframes countPulse{0%{transform:scale(1.3);opacity:.6}100%{transform:scale(1);opacity:1}}
+.video-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.call-status{font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px}
+.call-status::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pink-light)}
+.call-status.active::before{background:#4caf50;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ═══════════════════════════════════════════
+   CHAT
+════════════════════════════════════════════ */
+.chat-area{display:flex;flex-direction:column;height:400px}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px}
+.msg{display:flex;flex-direction:column;max-width:78%;animation:msgSlide .2s ease}
+@keyframes msgSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.them{align-self:flex-start;align-items:flex-start}
+.msg-bubble{padding:10px 14px;border-radius:18px;font-size:.9rem;line-height:1.4;word-break:break-word}
+.msg.me .msg-bubble{background:linear-gradient(135deg,var(--pink),var(--lavender));color:#fff;border-bottom-right-radius:4px}
+.msg.them .msg-bubble{background:var(--card-bg);border:1.5px solid var(--border);border-bottom-left-radius:4px}
+.msg-meta{font-size:.72rem;color:var(--text-muted);margin-top:2px;padding:0 4px}
+.typing-indicator{font-size:.8rem;color:var(--text-muted);padding:4px 12px;font-style:italic;min-height:24px}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1.5px solid var(--border);align-items:flex-end}
+.chat-input{resize:none;height:42px;max-height:120px;overflow-y:auto;border-radius:22px;padding:10px 16px;font-size:.9rem}
+.emoji-picker-btn{font-size:1.3rem;background:none;border:none;cursor:pointer;padding:4px}
+
+/* ═══════════════════════════════════════════
+   PHOTO BOOTH
+════════════════════════════════════════════ */
+.booth-layout{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+@media(max-width:900px){.booth-layout{grid-template-columns:1fr}}
+
+.template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:340px;overflow-y:auto;padding:4px}
+.template-card{border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);overflow:hidden;position:relative;aspect-ratio:3/4;display:flex;flex-direction:column}
+.template-card:hover{border-color:var(--pink);transform:translateY(-2px);box-shadow:var(--shadow)}
+.template-card.selected{border-color:var(--pink);box-shadow:0 0 0 3px rgba(240,98,146,.3)}
+.template-card.selected::after{content:'✓';position:absolute;top:6px;right:6px;background:var(--pink);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800}
+.template-preview{flex:1;display:flex;align-items:center;justify-content:center;font-size:1.5rem;padding:8px}
+.template-name{font-size:.7rem;font-weight:700;text-align:center;padding:4px 6px;background:rgba(0,0,0,.05)}
+
+.booth-preview-area{position:relative}
+.booth-canvas-wrap{text-align:center}
+#booth-canvas{max-width:100%;border-radius:var(--radius-sm);box-shadow:var(--shadow)}
+
+.ready-status{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.ready-item{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:50px;background:rgba(0,0,0,.05);font-size:.85rem;font-weight:600}
+.ready-item .check{font-size:1.1rem}
+
+.booth-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rounds-selector{display:flex;gap:6px;align-items:center;font-size:.85rem;font-weight:700}
+.rounds-btn{width:32px;height:32px;border-radius:50%;padding:0;border:1.5px solid var(--border);background:none;cursor:pointer;font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.rounds-btn.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+
+/* ═══════════════════════════════════════════
+   PHOTO EDITOR
+════════════════════════════════════════════ */
+.editor-canvas-wrap{position:relative;display:inline-block}
+#editor-canvas{border-radius:var(--radius-sm);cursor:crosshair;touch-action:none}
+.editor-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1.5px solid var(--border)}
+.tool-btn{padding:8px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:none;cursor:pointer;font-size:.8rem;font-weight:700;transition:all var(--transition);color:var(--text)}
+.tool-btn.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+.filter-strip{display:flex;gap:8px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.filter-strip::-webkit-scrollbar{display:none}
+.filter-thumb{width:70px;flex-shrink:0;cursor:pointer;border-radius:var(--radius-sm);overflow:hidden;border:2px solid transparent;transition:all var(--transition);text-align:center}
+.filter-thumb.active{border-color:var(--pink)}
+.filter-thumb img{width:100%;height:50px;object-fit:cover}
+.filter-thumb span{font-size:.65rem;font-weight:700;padding:2px;display:block}
+.sticker-panel{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:160px;overflow-y:auto;padding:4px}
+.sticker-btn{font-size:1.4rem;background:none;border:1.5px solid transparent;border-radius:8px;cursor:pointer;padding:4px;transition:all var(--transition)}
+.sticker-btn:hover{background:var(--lavender-light);border-color:var(--lavender)}
+.color-palette{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.color-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all var(--transition)}
+.color-swatch.active{border-color:var(--text);transform:scale(1.2)}
+
+/* ═══════════════════════════════════════════
+   GALLERY
+════════════════════════════════════════════ */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.gallery-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:3/4;cursor:pointer;transition:all var(--transition);group:true}
+.gallery-item:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
+.gallery-item-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);opacity:0;transition:opacity var(--transition);display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+.gallery-item:hover .gallery-item-overlay{opacity:1}
+.gallery-item-title{color:#fff;font-size:.8rem;font-weight:700}
+.gallery-item-actions{display:flex;gap:4px;margin-top:4px}
+.gallery-fav{position:absolute;top:8px;right:8px;font-size:1.1rem;cursor:pointer;opacity:.8;transition:opacity var(--transition)}
+.gallery-fav:hover{opacity:1}
+.gallery-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.gallery-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.gallery-empty-icon{font-size:4rem;margin-bottom:12px}
+
+/* Lightbox */
+#lightbox{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:20px}
+#lightbox img{max-width:100%;max-height:90vh;border-radius:var(--radius);object-fit:contain}
+.lightbox-close{position:fixed;top:20px;right:20px;width:44px;height:44px;background:rgba(255,255,255,.15);border:none;border-radius:50%;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* ═══════════════════════════════════════════
+   GAMES
+════════════════════════════════════════════ */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.game-card{text-align:center;cursor:pointer;transition:all var(--transition);padding:24px 16px}
+.game-card:hover{transform:translateY(-4px)}
+.game-icon{font-size:3rem;margin-bottom:12px}
+.game-title{font-weight:800;margin-bottom:6px}
+.game-desc{font-size:.8rem;color:var(--text-muted)}
+
+.game-modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px}
+.game-content{width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+
+/* Spin wheel */
+#spin-canvas{border-radius:50%;display:block;margin:0 auto}
+.spin-result{text-align:center;font-size:1.5rem;font-weight:800;padding:16px;background:linear-gradient(135deg,var(--pink),var(--lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Drawing board */
+#draw-canvas{border:2px solid var(--border);border-radius:var(--radius-sm);cursor:crosshair;touch-action:none;background:#fff}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+════════════════════════════════════════════ */
+#toast-container{position:fixed;top:80px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:12px 18px;border-radius:var(--radius-sm);font-weight:700;font-size:.85rem;animation:toastIn .3s ease;pointer-events:auto;display:flex;align-items:center;gap:8px;max-width:320px;box-shadow:var(--shadow)}
+.toast.info{background:var(--card-bg);border:1.5px solid var(--border);color:var(--text)}
+.toast.success{background:#e8f5e9;border:1.5px solid #4caf50;color:#2e7d32}
+.toast.error{background:#ffebee;border:1.5px solid #f44336;color:#c62828}
+.toast.warning{background:#fff3e0;border:1.5px solid #ff9800;color:#e65100}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+[data-theme="dark"] .toast.success{background:#1b5e20;color:#a5d6a7}
+[data-theme="dark"] .toast.error{background:#b71c1c;color:#ffcdd2}
+[data-theme="dark"] .toast.warning{background:#bf360c;color:#ffccbc}
+
+/* ═══════════════════════════════════════════
+   INVITE BOX
+════════════════════════════════════════════ */
+.invite-box{background:linear-gradient(135deg,rgba(240,98,146,.1),rgba(156,136,255,.1));border:2px dashed var(--pink);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px}
+.invite-code{font-family:monospace;font-size:1.2rem;font-weight:800;letter-spacing:4px;color:var(--pink);cursor:pointer;user-select:all}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════ */
+@media(max-width:768px){
+  .top-bar{padding:0 12px;height:52px}
+  .top-bar-logo span:last-child{font-size:.9rem}
+  .content{padding:12px 8px}
+  .nav-tab{padding:8px 12px;font-size:.8rem}
+  .booth-layout,.grid-2{grid-template-columns:1fr}
+  .games-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .template-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+  .video-stage{aspect-ratio:4/3;max-height:300px}
+  #local-video{width:30%;max-width:120px}
+  .chat-area{height:calc(100vh - 220px);min-height:300px}
+  .game-content{max-width:100%;margin:0 8px}
+  #draw-canvas{width:100%;height:auto}
+  #editor-canvas{max-width:100%;height:auto}
+  .editor-toolbar{gap:4px}
+  .tool-btn{padding:6px 10px;font-size:.75rem}
+  .sticker-panel{grid-template-columns:repeat(6,1fr)}
+  .btn{padding:9px 14px;font-size:.82rem}
+}
+@media(max-width:480px){
+  .gallery-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .btn{padding:8px 12px;font-size:.8rem}
+  .nav-tabs{gap:2px;padding:6px 8px}
+  .nav-tab{padding:6px 10px;font-size:.75rem}
+  .top-bar-actions{gap:4px}
+  .conn-badge{font-size:.7rem;padding:3px 8px}
+  .video-controls{gap:4px}
+  .btn-icon{width:38px;height:38px}
+  .auth-card{padding:16px}
+  .auth-title{font-size:1.6rem}
+  .auth-logo{font-size:2.5rem}
+  #lightbox{padding:8px}
+}
+
+/* ═══════════════════════════════════════════
+   LOADING SCREEN
+════════════════════════════════════════════ */
+#loading{position:fixed;inset:0;z-index:9999;background:var(--bg-grad);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.loading-logo{font-size:5rem;animation:loadBounce 1s infinite alternate}
+@keyframes loadBounce{0%{transform:scale(1) rotate(-5deg)}100%{transform:scale(1.1) rotate(5deg)}}
+.loading-bar{width:200px;height:4px;background:rgba(240,98,146,.2);border-radius:2px;overflow:hidden}
+.loading-bar-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--lavender));border-radius:2px;animation:loadBar 1.5s ease-in-out infinite}
+@keyframes loadBar{0%{width:0%;margin-left:0}50%{width:70%}100%{width:0%;margin-left:100%}}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+  <div class="loading-logo">📸</div>
+  <div style="font-family:'Pacifico',cursive;font-size:1.8rem;background:linear-gradient(135deg,#f06292,#9c88ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">TogetherBooth</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="hide" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- Game modal -->
+<div id="game-modal" class="game-modal hide">
+  <div id="game-content" class="card game-content"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ AUTH PAGE ════ -->
+<div id="auth-page" class="hide">
+  <div class="card auth-card">
+    <div class="auth-logo">📸</div>
+    <h1 class="auth-title font-pacifico">TogetherBooth</h1>
+    <p class="auth-subtitle">A private photo booth for two 💕</p>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Log in</div>
+      <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create / Join</div>
+    </div>
+    <div id="login-form">
+      <div class="form-group">
+        <label class="form-label">Your name</label>
+        <input id="login-name" autocomplete="username" placeholder="e.g. Luna" onkeydown="if(event.key==='Enter')$('login-pass').focus()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="login-pass" type="password" autocomplete="current-password" placeholder="8+ characters" onkeydown="if(event.key==='Enter')doAuth('login')">
+      </div>
+      <button class="btn btn-primary w-full" onclick="doAuth('login')">✨ Log in</button>
+    </div>
+    <div id="register-form" class="hide">
+      <div class="form-group">
+        <label class="form-label">Choose a name</label>
+        <input id="reg-name" autocomplete="username" placeholder="e.g. Nova" onkeydown="if(event.key==='Enter')$('reg-pass').focus()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (8+ characters)</label>
+        <input id="reg-pass" type="password" autocomplete="new-password" placeholder="Create a password" onkeydown="if(event.key==='Enter')doAuth('register')">
+      </div>
+      <div class="form-group" id="invite-group">
+        <label class="form-label">Invite code <span style="color:var(--text-muted);font-weight:400">(only when joining a room)</span></label>
+        <input id="reg-invite" placeholder="6-character code from your partner">
+        <p class="invite-hint">💡 First person creates the room freely. Second person needs the invite code shared by the first.</p>
+      </div>
+      <button class="btn btn-primary w-full" onclick="doAuth('register')">🎉 Create / Join Room</button>
+    </div>
+    <p class="error-msg" id="auth-error"></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ MAIN APP ════ -->
+<div id="app" class="hide">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-logo">
+      <span>📸</span>
+      <span class="font-pacifico" style="background:linear-gradient(135deg,var(--pink),var(--lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">TogetherBooth</span>
+    </div>
+    <div class="top-bar-actions">
+      <div id="conn-badge" class="conn-badge disconnected">⚡ Connecting…</div>
+      <div id="presence-dots" style="display:flex;gap:6px;align-items:center"></div>
+      <button class="btn btn-icon btn-secondary" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
+      <button class="btn btn-sm btn-secondary" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Invite box (shown only when room has 1 user) -->
+  <div id="invite-bar" class="hide" style="padding:0 20px;margin-top:8px">
+    <div class="invite-box">
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:8px">🔗 Share this invite code with your partner:</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="invite-code" id="invite-code" onclick="copyInvite()" title="Click to copy">——————</span>
+        <button class="btn btn-sm btn-secondary" onclick="copyInvite()">📋 Copy</button>
+        <button class="btn btn-sm btn-secondary" onclick="refreshInvite()">🔄 New code</button>
+      </div>
+      <div style="font-size:.75rem;color:var(--text-muted);margin-top:6px">Single-use · Your partner uses this on the "Create / Join" tab</div>
+    </div>
+  </div>
+
+  <!-- Nav tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('video')">📹 Video Call</button>
+    <button class="nav-tab" onclick="showTab('booth')">📸 Photo Booth</button>
+    <button class="nav-tab" onclick="showTab('editor')">🎨 Editor</button>
+    <button class="nav-tab" onclick="showTab('chat')">💬 Chat</button>
+    <button class="nav-tab" onclick="showTab('gallery')">🖼️ Memories</button>
+    <button class="nav-tab" onclick="showTab('games')">🎮 Games</button>
+    <button class="nav-tab" onclick="showTab('draw')">✏️ Drawing</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════ VIDEO CALL ═══════════ -->
+    <div id="tab-video" class="tab-panel">
+      <div class="grid-2" style="gap:16px">
+        <div>
+          <div class="video-stage">
+            <video id="remote-video" autoplay playsinline></video>
+            <video id="local-video" autoplay playsinline muted></video>
+            <div class="countdown-overlay" id="countdown-overlay"></div>
+          </div>
+          <div class="video-controls mt-3">
+            <button class="btn btn-secondary" id="btn-cam" onclick="startCamera()">📷 Start Camera</button>
+            <button class="btn btn-primary" id="btn-call" onclick="startCall()" disabled>📞 Call</button>
+            <button class="btn btn-secondary btn-icon" id="btn-mic" onclick="toggleMic()" disabled title="Mute/Unmute">🎙️</button>
+            <button class="btn btn-secondary btn-icon" id="btn-vid" onclick="toggleVideo()" disabled title="Camera on/off">📹</button>
+            <button class="btn btn-secondary btn-icon" id="btn-flip" onclick="flipCamera()" disabled title="Flip camera">🔄</button>
+            <button class="btn btn-danger btn-icon" id="btn-hang" onclick="hangUp()" disabled title="End call">📵</button>
+            <button class="btn btn-secondary btn-icon" id="btn-fs" onclick="goFullscreen()" title="Fullscreen">⛶</button>
+          </div>
+          <div class="call-status mt-2" id="call-status">Camera not started</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card">
+            <h3 style="margin-bottom:12px;font-size:1rem">👥 Who's online</h3>
+            <div id="presence-list"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:8px;font-size:1rem">🌐 Connection tips</h3>
+            <p style="font-size:.82rem;color:var(--text-muted);line-height:1.6">Camera requires HTTPS in production. For calls across different networks (not the same WiFi), a TURN server is needed. Click <b>Call</b> after both have started cameras.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ PHOTO BOOTH ═══════════ -->
+    <div id="tab-booth" class="tab-panel hide">
+      <div class="booth-layout">
+        <!-- Left: settings -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <h3 style="margin-bottom:12px">🎞️ Choose Template</h3>
+            <div class="template-grid" id="template-grid"></div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:12px">⚙️ Booth Settings</h3>
+            <div style="margin-bottom:12px">
+              <div class="form-label">Number of shots</div>
+              <div class="rounds-selector">
+                <button class="rounds-btn active" onclick="setRounds(2)" data-r="2">2</button>
+                <button class="rounds-btn" onclick="setRounds(3)" data-r="3">3</button>
+                <button class="rounds-btn" onclick="setRounds(4)" data-r="4">4</button>
+                <button class="rounds-btn" onclick="setRounds(6)" data-r="6">6</button>
+                <span style="color:var(--text-muted);font-size:.8rem">shots per person</span>
+              </div>
+            </div>
+            <div style="margin-bottom:12px">
+              <div class="form-label">Filter</div>
+              <select id="booth-filter" onchange="onFilterChange()">
+                <option value="none">No filter</option>
+                <option value="sepia(.8)">🌅 Sepia</option>
+                <option value="grayscale(1)">⚫ B&W</option>
+                <option value="saturate(1.6) hue-rotate(-15deg) brightness(1.1)">🌸 Warm</option>
+                <option value="contrast(1.15) brightness(1.1) saturate(1.2)">✨ Vivid</option>
+                <option value="contrast(1.1) brightness(1.1) blur(.5px)">💭 Dreamy</option>
+                <option value="hue-rotate(180deg) saturate(1.3)">🔮 Cyberpunk</option>
+                <option value="brightness(1.2) saturate(0.6)">🌙 Faded</option>
+              </select>
+            </div>
+            <div>
+              <div class="form-label">Caption</div>
+              <input id="booth-caption" placeholder="Add a caption…" maxlength="60" oninput="onCaptionChange()">
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="margin-bottom:12px">📸 Camera Preview</h3>
+            <div style="position:relative;border-radius:var(--radius-sm);overflow:hidden;background:#000;aspect-ratio:4/3">
+              <video id="booth-local-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
+              <div class="countdown-overlay" id="booth-countdown-overlay"></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-secondary" id="btn-booth-cam" onclick="startBoothCamera()">📷 Start Camera</button>
+              <button class="btn btn-secondary" id="btn-booth-flip" onclick="flipBoothCamera()" disabled>🔄 Flip</button>
+            </div>
+          </div>
+        </div>
+        <!-- Right: status + result -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card">
+            <h3 style="margin-bottom:12px">🎬 Readiness</h3>
+            <div class="ready-status" id="ready-status"></div>
+            <div id="booth-phase-msg" style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px"></div>
+            <div class="booth-controls">
+              <button class="btn btn-primary" id="btn-ready" onclick="toggleReady()" disabled>✅ I'm Ready!</button>
+              <button class="btn btn-secondary" id="btn-cancel" onclick="cancelBooth()">❌ Cancel</button>
+            </div>
+          </div>
+          <div class="card" id="booth-result-card" style="display:none">
+            <h3 style="margin-bottom:12px">🎉 Your Photo Strip!</h3>
+            <div class="booth-canvas-wrap">
+              <canvas id="booth-canvas"></canvas>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="downloadStrip('png')">⬇️ PNG</button>
+              <button class="btn btn-secondary" onclick="downloadStrip('jpeg')">⬇️ JPEG</button>
+              <button class="btn btn-secondary" onclick="saveToGallery()">💾 Save to Memories</button>
+              <button class="btn btn-secondary" onclick="openEditor()">🎨 Edit</button>
+              <button class="btn btn-secondary" id="btn-share" onclick="shareStrip()">📤 Share</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ EDITOR ═══════════ -->
+    <div id="tab-editor" class="tab-panel hide">
+      <div class="card" style="margin-bottom:16px">
+        <div class="editor-toolbar">
+          <button class="tool-btn active" id="tool-select" onclick="setTool('select')">🖱️ Select</button>
+          <button class="tool-btn" id="tool-text" onclick="setTool('text')">T Text</button>
+          <button class="tool-btn" id="tool-sticker" onclick="setTool('sticker')">😊 Sticker</button>
+          <button class="tool-btn" id="tool-pen" onclick="setTool('pen')">✏️ Draw</button>
+          <button class="tool-btn" id="tool-filter" onclick="setTool('filter')">🌈 Filter</button>
+          <div style="flex:1"></div>
+          <button class="tool-btn" onclick="editorUndo()">↩️ Undo</button>
+          <button class="tool-btn" onclick="resetEditor()">🔄 Reset</button>
+        </div>
+        
+        <!-- Filter panel -->
+        <div id="panel-filter" class="hide" style="margin-bottom:12px">
+          <div class="filter-strip" id="filter-strip"></div>
+        </div>
+        
+        <!-- Sticker panel -->
+        <div id="panel-sticker" class="hide" style="margin-bottom:12px">
+          <div class="sticker-panel" id="sticker-panel"></div>
+        </div>
+        
+        <!-- Text panel -->
+        <div id="panel-text" class="hide" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input id="text-input" placeholder="Type your text…" style="width:auto;flex:1;min-width:150px">
+          <select id="text-size" style="width:auto">
+            <option value="16">Small</option>
+            <option value="24" selected>Medium</option>
+            <option value="36">Large</option>
+            <option value="48">XL</option>
+          </select>
+          <div class="color-palette" id="text-color-palette"></div>
+          <button class="btn btn-primary btn-sm" onclick="addTextToCanvas()">Add</button>
+        </div>
+        
+        <!-- Pen panel -->
+        <div id="panel-pen" class="hide" style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="form-label">Size:</div>
+          <input type="range" id="pen-size" min="2" max="30" value="6" style="width:120px">
+          <div class="color-palette" id="pen-color-palette"></div>
+          <button class="btn btn-secondary btn-sm" onclick="clearEditorDraw()">Clear Drawing</button>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <div style="font-size:.85rem;color:var(--text-muted)">Click canvas to add. Drag selected items.</div>
+          <div style="flex:1"></div>
+          <button class="btn btn-sm btn-secondary" onclick="loadBoothIntoEditor()">📸 Load Photo Strip</button>
+          <button class="btn btn-primary btn-sm" onclick="downloadEdited()">⬇️ Download</button>
+          <button class="btn btn-secondary btn-sm" onclick="saveEditedToGallery()">💾 Save</button>
+        </div>
+      </div>
+      <div style="text-align:center;overflow:auto">
+        <div class="editor-canvas-wrap">
+          <canvas id="editor-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ CHAT ═══════════ -->
+    <div id="tab-chat" class="tab-panel hide">
+      <div class="card chat-area">
+        <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+        <div class="typing-indicator" id="typing-indicator"></div>
+        <div class="chat-input-row">
+          <button class="emoji-picker-btn" onclick="toggleEmojiPicker()" id="emoji-btn">😊</button>
+          <textarea class="chat-input" id="chat-input" placeholder="Say something cute… 💕" rows="1" onkeydown="onChatKeydown(event)" oninput="onChatInput()"></textarea>
+          <button class="btn btn-primary" onclick="sendChat()">Send 💌</button>
+        </div>
+        <div id="emoji-panel" class="hide" style="padding:8px;border-top:1.5px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;max-height:150px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════ GALLERY ═══════════ -->
+    <div id="tab-gallery" class="tab-panel hide">
+      <div class="gallery-filters">
+        <button class="btn btn-sm btn-active" onclick="filterGallery('all',this)">All</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterGallery('fav',this)">❤️ Favorites</button>
+        <button class="btn btn-sm btn-secondary" onclick="filterGallery('strip',this)">🎞️ Strips</button>
+      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="gallery-empty hide" id="gallery-empty">
+        <div class="gallery-empty-icon">📷</div>
+        <p>No memories yet. Take some photos!</p>
+      </div>
+    </div>
+
+    <!-- ═══════════ GAMES ═══════════ -->
+    <div id="tab-games" class="tab-panel hide">
+      <div class="games-grid" id="games-grid"></div>
+    </div>
+
+    <!-- ═══════════ DRAWING BOARD ═══════════ -->
+    <div id="tab-draw" class="tab-panel hide">
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="color-palette" id="draw-color-palette"></div>
+          <input type="range" id="draw-size" min="2" max="40" value="8" title="Brush size">
+          <button class="btn btn-secondary btn-sm" id="draw-eraser-btn" onclick="toggleEraser()">⬜ Eraser</button>
+          <button class="btn btn-danger btn-sm" onclick="clearDraw()">🗑️ Clear All</button>
+          <button class="btn btn-secondary btn-sm" onclick="downloadDrawing()">⬇️ Save</button>
+        </div>
+      </div>
+      <div style="overflow:auto;text-align:center">
+        <canvas id="draw-canvas" width="800" height="500"></canvas>
+      </div>
+    </div>
+
+  </div><!-- .content -->
+</div><!-- #app -->
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  GLOBALS & STATE
+// ═══════════════════════════════════════════════════════════════
+let me = null, myName = '', myColor = '#f06292', users = [], socket = null;
+let pc = null, localStream = null, facingMode = 'user', iceCfg = null;
+let boothLocalStream = null, boothFacing = 'user';
+let boothFrames = [], boothTemplate = 'classic-white', boothFilter = 'none', boothCaption = '';
+let boothRounds = 2, isReady = false, boothPhase = 'idle';
+let galleryList = [], galleryFilter = 'all';
+let editorCanvas = null, editorCtx = null, editorHistory = [], editorTool = 'select';
+let editorItems = [], editorDrag = null, editorDrawPath = null, penDrawing = false;
+let drawCanvas = null, drawCtx = null, drawErasing = false, drawColor = '#f06292';
+let activeTab = 'video', typingTimer = null, currentGame = null;
+
+const $ = id => document.getElementById(id);
+const api = async (url, method = 'GET', body) => {
+  const r = await fetch(url, {
+    method, headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+};
+const toast = (msg, type = 'info', duration = 3000) => {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+  el.innerHTML = `<span>${icons[type]||''}</span><span>${msg}</span>`;
+  $('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  THEME
+// ═══════════════════════════════════════════════════════════════
+function initTheme() {
+  const saved = localStorage.getItem('tb-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = saved;
+  $('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  localStorage.setItem('tb-theme', t);
+  $('theme-btn').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════════
+function switchAuthTab(tab) {
+  $('tab-login').classList.toggle('active', tab === 'login');
+  $('tab-register').classList.toggle('active', tab === 'register');
+  $('login-form').classList.toggle('hide', tab !== 'login');
+  $('register-form').classList.toggle('hide', tab !== 'register');
+  $('auth-error').textContent = '';
+}
+
+async function doAuth(kind) {
+  $('auth-error').textContent = '';
+  try {
+    const body = kind === 'login'
+      ? { name: $('login-name').value, password: $('login-pass').value }
+      : { name: $('reg-name').value, password: $('reg-pass').value, invite: $('reg-invite').value.trim() };
+    await api('/api/' + kind, 'POST', body);
+    await initApp();
+  } catch (e) {
+    $('auth-error').textContent = e.message;
+  }
+}
+
+async function doLogout() {
+  await api('/api/logout', 'POST').catch(() => {});
+  location.reload();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+async function boot() {
+  initTheme();
+  try {
+    const d = await api('/api/me');
+    me = d.me; myName = d.name; myColor = d.color || '#f06292';
+    users = d.users;
+    const cfg = await api('/api/config');
+    iceCfg = { iceServers: cfg.iceServers };
+    boothRounds = cfg.maxRounds ? Math.min(cfg.maxRounds, 6) : 2;
+    await initApp(d);
+  } catch {
+    // Not logged in
+    $('loading').classList.add('hide');
+    $('auth-page').classList.remove('hide');
+  }
+}
+
+async function initApp(data) {
+  if (!data) {
+    data = await api('/api/me');
+    me = data.me; myName = data.name; myColor = data.color || '#f06292';
+    users = data.users;
+    const cfg = await api('/api/config');
+    iceCfg = { iceServers: cfg.iceServers };
+    boothRounds = cfg.maxRounds ? Math.min(cfg.maxRounds, 6) : 2;
+  }
+
+  // Show app
+  $('loading').classList.add('hide');
+  $('auth-page').classList.add('hide');
+  $('app').classList.remove('hide');
+
+  // Invite bar
+  if (data.invite) {
+    $('invite-bar').classList.remove('hide');
+    $('invite-code').textContent = data.invite;
+  }
+
+  // Load history
+  const msgs = await api('/api/messages');
+  msgs.forEach(addChatMsg);
+
+  const photos = await api('/api/photos');
+  renderGallery(photos);
+
+  // Initialize components
+  initTemplateGrid();
+  initGames();
+  initEditor();
+  initDrawCanvas();
+  initEmojiPanel();
+  initColorPalettes();
+  initReadyStatus();
+
+  // Connect socket
+  connectSocket();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SOCKET.IO
+// ═══════════════════════════════════════════════════════════════
+function connectSocket() {
+  socket = io({ reconnection: true, reconnectionDelay: 1000 });
+
+  socket.on('connect', () => {
+    $('conn-badge').textContent = '🟢 Connected';
+    $('conn-badge').className = 'conn-badge connected';
+    toast('Connected to room!', 'success', 2000);
+  });
+  socket.on('disconnect', reason => {
+    $('conn-badge').textContent = '🔴 Reconnecting…';
+    $('conn-badge').className = 'conn-badge disconnected';
+    if (reason === 'io server disconnect') {
+      // Server forcefully disconnected; reconnect manually
+      socket.connect();
+    }
+  });
+  socket.on('connect_error', err => {
+    if (err.message === 'unauthorized') {
+      toast('Session expired. Please log in again.', 'error', 5000);
+      setTimeout(() => location.reload(), 2000);
+    }
+  });
+
+  socket.on('presence', ids => {
+    renderPresence(ids);
+  });
+
+  socket.on('chat', addChatMsg);
+  socket.on('typing', name => {
+    if (name !== myName) {
+      $('typing-indicator').textContent = `${name} is typing…`;
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => { $('typing-indicator').textContent = ''; }, 2000);
+    }
+  });
+
+  socket.on('signal', onSignal);
+  socket.on('hangup', () => { closePc(); toast('Call ended', 'info'); });
+
+  socket.on('booth:state', onBoothState);
+  socket.on('booth:tick', onBoothTick);
+  socket.on('booth:shoot', onBoothShoot);
+  socket.on('booth:done', onBoothDone);
+  socket.on('booth:cancelled', () => {
+    hideCountdownOverlays();
+    isReady = false;
+    updateReadyBtn();
+    toast('Booth cancelled', 'warning', 2000);
+  });
+
+  socket.on('gallery', renderGallery);
+  socket.on('chat:reaction', onChatReaction);
+  socket.on('game:state', onGameState);
+  socket.on('draw', onRemoteDraw);
+  socket.on('draw:clear', () => drawCtx && drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hide'));
+  const tabs = ['video','booth','editor','chat','gallery','games','draw'];
+  const navTabs = document.querySelectorAll('.nav-tab');
+  $('tab-' + name)?.classList.remove('hide');
+  tabs.forEach((t, i) => {
+    if (t === name) {
+      navTabs[i].classList.add('active');
+      navTabs[i].textContent = navTabs[i].textContent.replace(' 🔴','');
+    } else {
+      navTabs[i].classList.remove('active');
+    }
+  });
+  activeTab = name;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PRESENCE
+// ═══════════════════════════════════════════════════════════════
+function renderPresence(onlineIds) {
+  const list = $('presence-list');
+  const dots = $('presence-dots');
+  list.innerHTML = '';
+  dots.innerHTML = '';
+  users.forEach(u => {
+    const online = onlineIds.includes(u.id);
+    const safeName = escHtml(u.name);
+    const safeColor = u.color ? u.color.replace(/[^#a-fA-F0-9]/g,'') : '#f06292';
+    const initial = u.name[0] ? u.name[0].toUpperCase() : '?';
+    list.innerHTML += `<div class="flex items-center gap-2" style="margin-bottom:8px">
+      <div class="user-avatar" style="background:${safeColor};width:32px;height:32px;font-size:.8rem">${initial}</div>
+      <span style="font-weight:700">${safeName}</span>
+      <i class="dot ${online?'online':'offline'}"></i>
+      <span style="font-size:.75rem;color:var(--text-muted)">${online?'Online':'Offline'}</span>
+    </div>`;
+    dots.innerHTML += `<i class="dot ${online?'online':'offline'}" title="${safeName}"></i>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INVITE
+// ═══════════════════════════════════════════════════════════════
+async function copyInvite() {
+  const code = $('invite-code').textContent;
+  await navigator.clipboard.writeText(code).catch(() => {});
+  toast('Invite code copied!', 'success', 2000);
+}
+async function refreshInvite() {
+  try {
+    const d = await api('/api/invite', 'POST');
+    $('invite-code').textContent = d.invite;
+    toast('New invite code generated', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WEBRTC / VIDEO CALL
+// ═══════════════════════════════════════════════════════════════
+async function startCamera() {
+  try {
+    if (localStream) localStream.getTracks().forEach(t => t.stop());
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: true
+    });
+    $('local-video').srcObject = localStream;
+    ['btn-call','btn-mic','btn-vid','btn-flip'].forEach(id => $(id).disabled = false);
+    $('btn-cam').textContent = '🔄 Restart Camera';
+    $('call-status').textContent = 'Camera ready';
+    $('call-status').className = 'call-status';
+    if (pc) localStream.getTracks().forEach(t => {
+      const s = pc.getSenders().find(x => x.track?.kind === t.kind);
+      s ? s.replaceTrack(t) : pc.addTrack(t, localStream);
+    });
+  } catch (e) {
+    const msg = e.name === 'NotAllowedError'
+      ? 'Camera permission denied. Click the camera icon in your address bar to allow access.'
+      : e.message;
+    toast('Camera error: ' + msg, 'error', 5000);
+  }
+}
+
+async function flipCamera() {
+  facingMode = facingMode === 'user' ? 'environment' : 'user';
+  await startCamera();
+}
+
+function toggleMic() {
+  if (!localStream) return;
+  const t = localStream.getAudioTracks()[0];
+  if (!t) return;
+  t.enabled = !t.enabled;
+  $('btn-mic').textContent = t.enabled ? '🎙️' : '🔇';
+  $('btn-mic').title = t.enabled ? 'Mute' : 'Unmute';
+}
+
+function toggleVideo() {
+  if (!localStream) return;
+  const t = localStream.getVideoTracks()[0];
+  if (!t) return;
+  t.enabled = !t.enabled;
+  $('btn-vid').textContent = t.enabled ? '📹' : '📷';
+}
+
+function goFullscreen() {
+  $('tab-video').requestFullscreen?.();
+}
+
+function makePc() {
+  if (pc) pc.close();
+  pc = new RTCPeerConnection(iceCfg);
+  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  pc.onicecandidate = e => e.candidate && socket.emit('signal', { cand: e.candidate });
+  pc.ontrack = e => { $('remote-video').srcObject = e.streams[0]; };
+  pc.onconnectionstatechange = () => {
+    const s = pc.connectionState;
+    $('call-status').textContent = 'Call: ' + s;
+    $('call-status').className = 'call-status' + (s === 'connected' ? ' active' : '');
+    $('btn-hang').disabled = false;
+    if (s === 'failed') { pc.restartIce(); toast('Connection issue, attempting ICE restart…', 'warning'); }
+  };
+}
+
+async function startCall() {
+  if (!localStream) await startCamera();
+  makePc();
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  socket.emit('signal', { desc: pc.localDescription });
+}
+
+async function onSignal(d) {
+  if (d.desc) {
+    if (!pc) { if (!localStream) await startCamera(); makePc(); }
+    await pc.setRemoteDescription(d.desc);
+    if (d.desc.type === 'offer') {
+      const ans = await pc.createAnswer();
+      await pc.setLocalDescription(ans);
+      socket.emit('signal', { desc: pc.localDescription });
+    }
+  } else if (d.cand && pc) {
+    try { await pc.addIceCandidate(d.cand); } catch {}
+  }
+}
+
+function closePc() {
+  pc?.close(); pc = null;
+  $('remote-video').srcObject = null;
+  $('call-status').textContent = 'Call ended';
+  $('call-status').className = 'call-status';
+  $('btn-hang').disabled = true;
+}
+
+async function hangUp() {
+  socket.emit('hangup');
+  closePc();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CHAT
+// ═══════════════════════════════════════════════════════════════
+const EMOJIS = ['😊','😂','🥰','😍','🤩','😎','🥳','😢','😭','😅','😘','💕','💖','💗','❤️','🌸','🌹','✨','🎉','🎊','🎈','🍓','🍰','☕','🌙','⭐','🦋','🌈','🔮','💫'];
+
+function initEmojiPanel() {
+  const panel = $('emoji-panel');
+  EMOJIS.forEach(e => {
+    const btn = document.createElement('button');
+    btn.textContent = e;
+    btn.className = 'emoji-picker-btn';
+    btn.style.cssText = 'font-size:1.4rem;background:none;border:none;cursor:pointer;padding:4px';
+    btn.onclick = () => {
+      $('chat-input').value += e;
+      $('chat-input').focus();
+    };
+    panel.appendChild(btn);
+  });
+}
+
+function toggleEmojiPicker() {
+  $('emoji-panel').classList.toggle('hide');
+}
+
+function onChatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  else if (socket?.connected) socket.emit('typing');
+}
+
+function onChatInput() {
+  const ta = $('chat-input');
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+}
+
+function sendChat() {
+  const text = $('chat-input').value.trim();
+  if (!text || !socket?.connected) return;
+  socket.emit('chat', text);
+  $('chat-input').value = '';
+  $('chat-input').style.height = 'auto';
+  $('emoji-panel').classList.add('hide');
+}
+
+function addChatMsg(m) {
+  const mine = m.from === me;
+  const div = document.createElement('div');
+  div.className = `msg ${mine ? 'me' : 'them'}`;
+  const name = mine ? 'You' : (users.find(u => u.id === m.from)?.name || m.fromName || '?');
+  const time = new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `
+    <div class="msg-bubble">${escHtml(m.text)}</div>
+    <div class="msg-meta">${mine ? '' : name + ' · '}${time}</div>`;
+  $('chat-messages').appendChild(div);
+  $('chat-messages').scrollTop = 1e9;
+  // Show badge if not on chat tab
+  if (activeTab !== 'chat') {
+    const navTabs = document.querySelectorAll('.nav-tab');
+    navTabs[3].textContent = '💬 Chat 🔴';
+  }
+}
+
+function escHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\n/g,'<br>');
+}
+
+function onChatReaction({ msgId, emoji, reactions }) {
+  // Reactions could be rendered next to messages — for now show a toast
+  if (emoji) toast(`${emoji} reaction added!`, 'info', 1500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PHOTO BOOTH — TEMPLATES
+// ═══════════════════════════════════════════════════════════════
+const TEMPLATES = [
+  // Classic
+  { id:'classic-white', name:'Classic White', emoji:'⬜', bg:'#ffffff', fg:'#333333', accent:'#dddddd', stripBg:'#f5f5f5', font:'serif' },
+  { id:'classic-cream', name:'Vintage Cream', emoji:'🟨', bg:'#fffdf0', fg:'#5c4a1e', accent:'#d4b896', stripBg:'#fef9e7', font:'serif' },
+  { id:'minimal-black', name:'Minimal Black', emoji:'⬛', bg:'#111111', fg:'#ffffff', accent:'#444444', stripBg:'#000000', font:'sans-serif' },
+  // Pink / Romantic
+  { id:'pink-soft', name:'Soft Pink', emoji:'🌸', bg:'#fce4ec', fg:'#880e4f', accent:'#f8bbd0', stripBg:'#fce4ec', font:'cursive', deco:'♥' },
+  { id:'pink-hot', name:'Hot Pink', emoji:'💗', bg:'#ff4081', fg:'#ffffff', accent:'#f50057', stripBg:'#e91e63', font:'cursive', deco:'♥' },
+  { id:'romantic-rose', name:'Romantic Rose', emoji:'🌹', bg:'#fff0f0', fg:'#b71c1c', accent:'#ef9a9a', stripBg:'#ffcdd2', font:'cursive', deco:'❤️' },
+  { id:'valentines', name:'Valentine', emoji:'❤️', bg:'#ffebee', fg:'#c62828', accent:'#ef9a9a', stripBg:'#ff8a80', font:'cursive', deco:'💕' },
+  // Lavender / Purple
+  { id:'lavender', name:'Lavender Dream', emoji:'💜', bg:'#ede7f6', fg:'#4a148c', accent:'#ce93d8', stripBg:'#e8d5f5', font:'sans-serif', deco:'✦' },
+  { id:'midnight', name:'Midnight Purple', emoji:'🌙', bg:'#1a1440', fg:'#e8d5f5', accent:'#7c4dff', stripBg:'#150d30', font:'sans-serif', deco:'★' },
+  { id:'galaxy', name:'Galaxy', emoji:'🌌', bg:'#0d0221', fg:'#e8d5f5', accent:'#9c27b0', stripBg:'#090118', font:'sans-serif', deco:'✦' },
+  // Retro / Film
+  { id:'film-strip', name:'Film Strip', emoji:'🎞️', bg:'#111111', fg:'#eeeeee', accent:'#555555', stripBg:'#0a0a0a', font:'monospace', film:true },
+  { id:'retro-orange', name:'Retro Orange', emoji:'🟠', bg:'#ff6b35', fg:'#ffffff', accent:'#ff9a00', stripBg:'#e64a19', font:'sans-serif', deco:'✱' },
+  { id:'vintage-sepia', name:'Sepia Vintage', emoji:'🟤', bg:'#d7ccc8', fg:'#3e2723', accent:'#a1887f', stripBg:'#efebe9', font:'serif' },
+  { id:'polaroid', name:'Polaroid', emoji:'📷', bg:'#ffffff', fg:'#333333', accent:'#eeeeee', stripBg:'#f5f5f5', font:'serif', polaroid:true },
+  // Kawaii / Cute
+  { id:'kawaii-pink', name:'Kawaii Pink', emoji:'🍡', bg:'#fce4ec', fg:'#ad1457', accent:'#f8bbd0', stripBg:'#fff0f5', font:'cursive', deco:'🌸' },
+  { id:'kawaii-mint', name:'Kawaii Mint', emoji:'🌿', bg:'#e0f7fa', fg:'#006064', accent:'#b2ebf2', stripBg:'#e8fff9', font:'cursive', deco:'✿' },
+  { id:'pastel-rainbow', name:'Pastel Rainbow', emoji:'🌈', bg:'#fce4ec', fg:'#6200ea', accent:'#e1bee7', stripBg:'#fff8e1', font:'cursive' },
+  // Nature / Seasonal
+  { id:'spring-blossom', name:'Spring Blossom', emoji:'🌺', bg:'#f9fbe7', fg:'#558b2f', accent:'#c5e1a5', stripBg:'#f1f8e9', font:'sans-serif', deco:'🌸' },
+  { id:'summer-beach', name:'Summer Beach', emoji:'🏖️', bg:'#fff9c4', fg:'#e65100', accent:'#ffeb3b', stripBg:'#fffde7', font:'sans-serif', deco:'☀️' },
+  { id:'autumn-leaves', name:'Autumn Leaves', emoji:'🍂', bg:'#fbe9e7', fg:'#bf360c', accent:'#ff8a65', stripBg:'#fff3e0', font:'serif', deco:'🍁' },
+  { id:'winter-snow', name:'Winter Snow', emoji:'❄️', bg:'#e8f5f9', fg:'#1a237e', accent:'#bbdefb', stripBg:'#e3f2fd', font:'sans-serif', deco:'❄️' },
+  // Birthday / Celebration
+  { id:'birthday', name:'Birthday Party', emoji:'🎂', bg:'#fff8e1', fg:'#e65100', accent:'#ffcc02', stripBg:'#fffde7', font:'cursive', deco:'🎉' },
+  { id:'confetti', name:'Confetti', emoji:'🎊', bg:'#e8eaf6', fg:'#1a237e', accent:'#9fa8da', stripBg:'#f3f4fe', font:'sans-serif', deco:'🎊' },
+  // Aesthetic / Magazine
+  { id:'editorial', name:'Editorial', emoji:'📰', bg:'#fafafa', fg:'#212121', accent:'#bdbdbd', stripBg:'#f5f5f5', font:'sans-serif' },
+  { id:'fashion-mag', name:'Fashion Mag', emoji:'💄', bg:'#ffffff', fg:'#111111', accent:'#ff4081', stripBg:'#f8f8f8', font:'sans-serif', deco:'✦' },
+  { id:'neon-night', name:'Neon Night', emoji:'🌃', bg:'#0a0a0a', fg:'#00e5ff', accent:'#ff00e5', stripBg:'#050505', font:'monospace', deco:'◈' },
+  // Friendship
+  { id:'friendship', name:'Best Friends', emoji:'👫', bg:'#fff3e0', fg:'#4e342e', accent:'#ffccbc', stripBg:'#fff8e1', font:'cursive', deco:'☺' },
+  { id:'couple', name:'Couple Goals', emoji:'👩‍❤️‍👨', bg:'#fce4ec', fg:'#880e4f', accent:'#f48fb1', stripBg:'#fff0f5', font:'cursive', deco:'💞' },
+  // Scrapbook
+  { id:'scrapbook', name:'Scrapbook', emoji:'✂️', bg:'#fafafa', fg:'#333333', accent:'#e0e0e0', stripBg:'#fff8f0', font:'cursive', scrapbook:true },
+  // Heart
+  { id:'heart', name:'Heart Frame', emoji:'💖', bg:'#fff0f8', fg:'#880e4f', accent:'#f8bbd0', stripBg:'#fce4ec', font:'cursive', deco:'💖' },
+];
+
+function initTemplateGrid() {
+  const grid = $('template-grid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'template-card' + (t.id === boothTemplate ? ' selected' : '');
+    card.dataset.id = t.id;
+    card.onclick = () => selectTemplate(t.id);
+    card.innerHTML = `<div class="template-preview" style="background:${t.bg};color:${t.fg}">${t.emoji}</div><div class="template-name" style="background:${t.bg};color:${t.fg}">${t.name}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+function selectTemplate(id) {
+  boothTemplate = id;
+  document.querySelectorAll('.template-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.id === id);
+  });
+  socket?.emit('booth:template', id);
+  if (boothFrames.length) renderStrip();
+}
+
+function setRounds(n) {
+  boothRounds = n;
+  document.querySelectorAll('.rounds-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.r) === n);
+  });
+  socket?.emit('booth:rounds', n);
+}
+
+function onFilterChange() {
+  boothFilter = $('booth-filter').value;
+  socket?.emit('booth:filter', boothFilter);
+  if (boothFrames.length) renderStrip();
+}
+
+function onCaptionChange() {
+  boothCaption = $('booth-caption').value;
+  socket?.emit('booth:caption', boothCaption);
+  if (boothFrames.length) renderStrip();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PHOTO BOOTH — CAMERA
+// ═══════════════════════════════════════════════════════════════
+async function startBoothCamera() {
+  try {
+    if (boothLocalStream) boothLocalStream.getTracks().forEach(t => t.stop());
+    boothLocalStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: boothFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    $('booth-local-video').srcObject = boothLocalStream;
+    $('btn-booth-flip').disabled = false;
+    $('btn-ready').disabled = false;
+    $('btn-booth-cam').textContent = '🔄 Restart Camera';
+    toast('Camera ready!', 'success', 2000);
+  } catch (e) {
+    toast('Camera error: ' + (e.name === 'NotAllowedError' ? 'Permission denied.' : e.message), 'error', 5000);
+  }
+}
+
+async function flipBoothCamera() {
+  boothFacing = boothFacing === 'user' ? 'environment' : 'user';
+  await startBoothCamera();
+}
+
+function captureFromBooth() {
+  const v = $('booth-local-video');
+  if (!boothLocalStream || !v.videoWidth) return null;
+  const c = document.createElement('canvas');
+  c.width = 640; c.height = 480;
+  const ctx = c.getContext('2d');
+  if (boothFilter !== 'none') ctx.filter = boothFilter;
+  const r = Math.max(640 / v.videoWidth, 480 / v.videoHeight);
+  const w = v.videoWidth * r, h = v.videoHeight * r;
+  ctx.drawImage(v, (640 - w) / 2, (480 - h) / 2, w, h);
+  return c.toDataURL('image/jpeg', 0.88);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PHOTO BOOTH — SIGNALING
+// ═══════════════════════════════════════════════════════════════
+function initReadyStatus() {
+  updateReadyStatus({});
+}
+
+function updateReadyStatus(readyMap) {
+  const div = $('ready-status');
+  div.innerHTML = users.map(u => {
+    const rdy = readyMap[u.id] || false;
+    const safeName = escHtml(u.name);
+    const safeColor = u.color ? u.color.replace(/[^#a-fA-F0-9]/g,'') : '#f06292';
+    const initial = u.name[0] ? u.name[0].toUpperCase() : '?';
+    return `<div class="ready-item">
+      <div class="user-avatar" style="background:${safeColor};width:28px;height:28px;font-size:.75rem">${initial}</div>
+      <span>${safeName}</span>
+      <span class="check">${rdy ? '✅' : '⏳'}</span>
+    </div>`;
+  }).join('');
+}
+
+function updateReadyBtn() {
+  const btn = $('btn-ready');
+  if (isReady) {
+    btn.textContent = '⏳ Waiting…';
+    btn.classList.add('btn-active');
+  } else {
+    btn.textContent = '✅ I\'m Ready!';
+    btn.classList.remove('btn-active');
+  }
+}
+
+function toggleReady() {
+  if (!boothLocalStream) { toast('Start your camera first!', 'warning'); return; }
+  isReady = !isReady;
+  socket.emit('booth:ready', isReady);
+  updateReadyBtn();
+}
+
+function cancelBooth() {
+  isReady = false;
+  socket.emit('booth:cancel');
+  updateReadyBtn();
+}
+
+function onBoothState(s) {
+  boothTemplate = s.template || 'classic-white';
+  boothFilter = s.filter || 'none';
+  boothCaption = s.caption || '';
+  boothRounds = s.rounds || 2;
+  boothPhase = s.phase || 'idle';
+
+  // Update UI selectors
+  document.querySelectorAll('.template-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.id === boothTemplate);
+  });
+  const filterSel = $('booth-filter');
+  if (filterSel && filterSel.querySelector(`option[value="${boothFilter}"]`)) {
+    filterSel.value = boothFilter;
+  }
+  const captionEl = $('booth-caption');
+  if (captionEl && captionEl !== document.activeElement) captionEl.value = boothCaption;
+  document.querySelectorAll('.rounds-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.r) === boothRounds);
+  });
+  updateReadyStatus(s.ready || {});
+
+  const phaseMsg = { idle: '', countdown: '🔴 Countdown starting…', shooting: '📸 Smile!', done: '🎉 All done!' };
+  $('booth-phase-msg').textContent = phaseMsg[boothPhase] || '';
+}
+
+function onBoothTick(c) {
+  showCountdownOverlays(c);
+}
+
+function showCountdownOverlays(text) {
+  [$('countdown-overlay'), $('booth-countdown-overlay')].forEach(el => {
+    if (!el) return;
+    el.textContent = text;
+    el.style.display = 'flex';
+  });
+}
+
+function hideCountdownOverlays() {
+  [$('countdown-overlay'), $('booth-countdown-overlay')].forEach(el => {
+    if (!el) return;
+    el.style.display = 'none';
+  });
+}
+
+function onBoothShoot(round) {
+  hideCountdownOverlays();
+  showCountdownOverlays('📸');
+  setTimeout(() => {
+    const img = captureFromBooth();
+    hideCountdownOverlays();
+    if (img) {
+      socket.emit('booth:shot', { round, img });
+      toast(`Shot ${round + 1} captured!`, 'success', 1500);
+    } else {
+      toast('Camera not ready — start your camera first!', 'error');
+    }
+  }, 200);
+}
+
+function onBoothDone(data) {
+  boothFrames = data.frames || data;
+  hideCountdownOverlays();
+  isReady = false;
+  updateReadyBtn();
+  renderStrip();
+  $('booth-result-card').style.display = '';
+  toast('🎉 Photo strip ready!', 'success', 3000);
+  showTab('booth');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STRIP RENDERING
+// ═══════════════════════════════════════════════════════════════
+function renderStrip() {
+  const tpl = TEMPLATES.find(t => t.id === boothTemplate) || TEMPLATES[0];
+  const c = $('booth-canvas');
+  const n = boothFrames.length;
+  const W = 600;
+  const FRAME_H = 420;
+  const PAD = tpl.polaroid ? 40 : (tpl.film ? 70 : 40);
+  const TOP_PAD = 50;
+  const BOTTOM_PAD = 140;
+  const H = TOP_PAD + n * (FRAME_H + 16) + BOTTOM_PAD;
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+
+  // Background
+  if (tpl.id === 'galaxy') {
+    const grd = ctx.createLinearGradient(0, 0, W, H);
+    grd.addColorStop(0, '#0d0221');
+    grd.addColorStop(.5, '#1a0045');
+    grd.addColorStop(1, '#000a1a');
+    ctx.fillStyle = grd;
+  } else { ctx.fillStyle = tpl.stripBg || tpl.bg; }
+  ctx.fillRect(0, 0, W, H);
+
+  // Film sprocket holes
+  if (tpl.film) {
+    ctx.fillStyle = '#222';
+    for (let y = 20; y < H - 20; y += 55) {
+      ctx.beginPath(); ctx.roundRect(10, y, 22, 34, 4); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(W - 32, y, 22, 34, 4); ctx.fill();
+    }
+  }
+
+  // Stars for galaxy/midnight
+  if (tpl.id === 'galaxy' || tpl.id === 'midnight') {
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < 80; i++) {
+      const x = Math.random() * W, y = Math.random() * H, r = Math.random() * 1.5 + .3;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
+
+  Promise.all(boothFrames.map(loadImg)).then(imgs => {
+    imgs.forEach((im, i) => {
+      const y = TOP_PAD + i * (FRAME_H + 16);
+      const fW = W - PAD * 2;
+      const fH = FRAME_H;
+
+      if (tpl.polaroid) {
+        // Polaroid white border
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = 'rgba(0,0,0,.2)';
+        ctx.shadowBlur = 12;
+        ctx.fillRect(PAD - 12, y - 12, fW + 24, fH + 60);
+        ctx.shadowBlur = 0;
+      }
+
+      // Draw photo
+      ctx.save();
+      if (boothFilter !== 'none') ctx.filter = boothFilter;
+      // Maintain aspect ratio with cover
+      const ir = im.width / im.height;
+      const fr = fW / fH;
+      let sx = 0, sy = 0, sw = im.width, sh = im.height;
+      if (ir > fr) { sw = im.height * fr; sx = (im.width - sw) / 2; }
+      else { sh = im.width / fr; sy = (im.height - sh) / 2; }
+      ctx.drawImage(im, sx, sy, sw, sh, PAD, y, fW, fH);
+      ctx.restore();
+
+      // Photo border
+      if (!tpl.film && !tpl.polaroid) {
+        ctx.strokeStyle = tpl.accent || 'rgba(0,0,0,.1)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(PAD, y, fW, fH);
+      }
+    });
+
+    // Decorative footer
+    ctx.fillStyle = tpl.fg || '#333';
+    ctx.textAlign = 'center';
+
+    if (tpl.deco) {
+      ctx.font = `${tpl.id.includes('kawaii') ? 'bold' : ''} 22px serif`;
+      ctx.fillText((tpl.deco + ' ').repeat(10), W / 2, H - 100);
+    }
+
+    // Names / caption
+    const caption = boothCaption || users.map(u => u.name).join(' & ');
+    ctx.font = `italic bold 36px "${tpl.font === 'cursive' ? 'Pacifico, Comic Sans MS' : tpl.font === 'monospace' ? 'Courier New' : 'Georgia'}", serif`;
+    ctx.fillStyle = tpl.fg;
+    ctx.fillText(caption, W / 2, H - 60);
+
+    ctx.font = '18px sans-serif';
+    ctx.fillStyle = tpl.fg + '99';
+    ctx.fillText(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), W / 2, H - 32);
+
+    // Logo
+    ctx.font = '13px sans-serif';
+    ctx.fillStyle = tpl.fg + '66';
+    ctx.fillText('📸 TogetherBooth', W / 2, H - 12);
+  });
+}
+
+function downloadStrip(type) {
+  const c = $('booth-canvas');
+  const a = document.createElement('a');
+  a.href = type === 'png' ? c.toDataURL('image/png') : c.toDataURL('image/jpeg', .95);
+  a.download = `togetherbooth-${Date.now()}.${type}`;
+  a.click();
+}
+
+async function saveToGallery() {
+  try {
+    const c = $('booth-canvas');
+    await api('/api/photos', 'POST', {
+      dataUrl: c.toDataURL('image/png'),
+      title: boothCaption || users.map(u => u.name).join(' & ') + ' Strip',
+      caption: boothCaption,
+      templateId: boothTemplate
+    });
+    toast('💾 Saved to memories!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function shareStrip() {
+  $('booth-canvas').toBlob(b => {
+    navigator.share?.({ files: [new File([b], 'strip.png', { type: 'image/png' })] }).catch(() => {});
+  });
+}
+
+function openEditor() {
+  loadBoothIntoEditor();
+  showTab('editor');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PHOTO EDITOR
+// ═══════════════════════════════════════════════════════════════
+const STICKERS = ['😊','😂','🥰','😍','🤩','🤗','😎','🥳','😘','💕','💖','💗','❤️','🧡','💛','💚','💙','💜','🌸','🌺','🌻','🌹','✨','🎉','🎊','🌈','⭐','🌙','☀️','🍓','🍰','☕','🦋','🔮','💫','🎵','🎶','🦄','🌟','💎','🎀','🎁'];
+const FILTERS_EDIT = [
+  { name: 'None', value: 'none' },
+  { name: 'Warm', value: 'sepia(.3) saturate(1.4) brightness(1.05)' },
+  { name: 'Cool', value: 'hue-rotate(30deg) saturate(1.2)' },
+  { name: 'B&W', value: 'grayscale(1)' },
+  { name: 'Sepia', value: 'sepia(.8)' },
+  { name: 'Vivid', value: 'saturate(1.8) contrast(1.1)' },
+  { name: 'Faded', value: 'brightness(1.15) saturate(0.6)' },
+  { name: 'Dreamy', value: 'blur(.7px) brightness(1.1)' },
+  { name: 'Neon', value: 'saturate(2) contrast(1.3) hue-rotate(10deg)' },
+];
+const TEXT_COLORS = ['#333333','#ffffff','#f06292','#9c27b0','#2196f3','#4caf50','#ff9800','#f44336','#ffeb3b','#795548'];
+const PEN_COLORS = ['#f06292','#9c27b0','#2196f3','#4caf50','#ff9800','#f44336','#333333','#ffffff'];
+
+let editorFilter = 'none';
+let editorBaseImg = null;
+let editorPenCtx = null, editorPenCanvas = null;
+let editorTextColor = '#333333', editorPenColor = '#f06292';
+let editorPenSize = 6;
+let selectedItem = null;
+
+function initEditor() {
+  editorCanvas = $('editor-canvas');
+  editorCtx = editorCanvas.getContext('2d');
+  editorCanvas.width = 600;
+  editorCanvas.height = 900;
+  drawEditorBase();
+
+  // Filter strip
+  const strip = $('filter-strip');
+  FILTERS_EDIT.forEach(f => {
+    const d = document.createElement('div');
+    d.className = 'filter-thumb' + (f.value === 'none' ? ' active' : '');
+    d.innerHTML = `<div style="width:100%;height:50px;background:#f8bbd0;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🌸</div><span>${f.name}</span>`;
+    d.onclick = () => {
+      editorFilter = f.value;
+      document.querySelectorAll('.filter-thumb').forEach(x => x.classList.remove('active'));
+      d.classList.add('active');
+      redrawEditor();
+    };
+    strip.appendChild(d);
+  });
+
+  // Sticker panel
+  const sp = $('sticker-panel');
+  STICKERS.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'sticker-btn';
+    btn.textContent = s;
+    btn.onclick = () => addSticker(s);
+    sp.appendChild(btn);
+  });
+
+  // Canvas interactions
+  editorCanvas.addEventListener('mousedown', editorMouseDown);
+  editorCanvas.addEventListener('mousemove', editorMouseMove);
+  editorCanvas.addEventListener('mouseup', editorMouseUp);
+  editorCanvas.addEventListener('touchstart', editorTouchStart, { passive: false });
+  editorCanvas.addEventListener('touchmove', editorTouchMove, { passive: false });
+  editorCanvas.addEventListener('touchend', editorMouseUp);
+}
+
+function initColorPalettes() {
+  // Text color
+  const tcp = $('text-color-palette');
+  TEXT_COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c === editorTextColor ? ' active' : '');
+    s.style.background = c;
+    s.style.border = `2px solid ${c === '#ffffff' ? '#ccc' : c}`;
+    s.onclick = () => {
+      editorTextColor = c;
+      document.querySelectorAll('#text-color-palette .color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+    };
+    tcp.appendChild(s);
+  });
+
+  // Pen color
+  const pcp = $('pen-color-palette');
+  PEN_COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c === editorPenColor ? ' active' : '');
+    s.style.background = c;
+    s.style.border = `2px solid ${c === '#ffffff' ? '#ccc' : c}`;
+    s.onclick = () => {
+      editorPenColor = c;
+      document.querySelectorAll('#pen-color-palette .color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+    };
+    pcp.appendChild(s);
+  });
+
+  // Draw board color
+  const dcp = $('draw-color-palette');
+  PEN_COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c === drawColor ? ' active' : '');
+    s.style.background = c;
+    s.style.border = `2px solid ${c === '#ffffff' ? '#ccc' : c}`;
+    s.onclick = () => {
+      drawColor = c;
+      drawErasing = false;
+      $('draw-eraser-btn').classList.remove('btn-active');
+      document.querySelectorAll('#draw-color-palette .color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+    };
+    dcp.appendChild(s);
+  });
+}
+
+function drawEditorBase() {
+  if (!editorCtx) return;
+  editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+  editorCtx.fillStyle = '#f0f0f0';
+  editorCtx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+  editorCtx.fillStyle = '#bbb';
+  editorCtx.textAlign = 'center';
+  editorCtx.font = '16px sans-serif';
+  editorCtx.fillText('Load a photo strip or take photos first', editorCanvas.width / 2, editorCanvas.height / 2);
+}
+
+function loadBoothIntoEditor() {
+  const src = $('booth-canvas');
+  if (!src || !boothFrames.length) { toast('Take photos first!', 'warning'); return; }
+  editorCanvas.width = src.width;
+  editorCanvas.height = src.height;
+  editorBaseImg = new Image();
+  editorBaseImg.onload = () => {
+    editorItems = [];
+    editorHistory = [];
+    editorFilter = 'none';
+    redrawEditor();
+    toast('Photo strip loaded into editor!', 'success');
+  };
+  editorBaseImg.src = src.toDataURL();
+}
+
+function redrawEditor() {
+  if (!editorCtx) return;
+  editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+
+  if (editorBaseImg) {
+    editorCtx.save();
+    if (editorFilter !== 'none') editorCtx.filter = editorFilter;
+    editorCtx.drawImage(editorBaseImg, 0, 0);
+    editorCtx.restore();
+  } else {
+    drawEditorBase();
+  }
+
+  // Draw all items
+  editorItems.forEach((item, idx) => {
+    editorCtx.save();
+    if (item.type === 'text') {
+      editorCtx.font = `bold ${item.size}px "Nunito", sans-serif`;
+      editorCtx.fillStyle = item.color;
+      editorCtx.shadowColor = 'rgba(0,0,0,.3)';
+      editorCtx.shadowBlur = 4;
+      editorCtx.fillText(item.text, item.x, item.y);
+      if (selectedItem === idx) {
+        editorCtx.strokeStyle = '#f06292';
+        editorCtx.lineWidth = 1.5;
+        editorCtx.strokeRect(item.x - 4, item.y - item.size - 4, editorCtx.measureText(item.text).width + 8, item.size + 12);
+      }
+    } else if (item.type === 'sticker') {
+      editorCtx.font = `${item.size}px serif`;
+      editorCtx.textBaseline = 'middle';
+      editorCtx.fillText(item.emoji, item.x, item.y);
+      if (selectedItem === idx) {
+        editorCtx.strokeStyle = '#f06292';
+        editorCtx.lineWidth = 1.5;
+        editorCtx.strokeRect(item.x - 4, item.y - item.size / 2 - 4, item.size + 8, item.size + 8);
+      }
+    } else if (item.type === 'drawing') {
+      editorCtx.strokeStyle = item.color;
+      editorCtx.lineWidth = item.size;
+      editorCtx.lineCap = 'round';
+      editorCtx.lineJoin = 'round';
+      if (item.points.length > 1) {
+        editorCtx.beginPath();
+        editorCtx.moveTo(item.points[0].x, item.points[0].y);
+        item.points.forEach(p => editorCtx.lineTo(p.x, p.y));
+        editorCtx.stroke();
+      }
+    }
+    editorCtx.restore();
+  });
+}
+
+function setTool(tool) {
+  editorTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  $('tool-' + tool)?.classList.add('active');
+  ['filter','sticker','text','pen'].forEach(p => {
+    const panel = $('panel-' + p);
+    if (panel) panel.classList.toggle('hide', p !== tool);
+  });
+  editorCanvas.style.cursor = tool === 'pen' ? 'crosshair' : (tool === 'select' ? 'pointer' : 'default');
+}
+
+function addTextToCanvas() {
+  const text = $('text-input').value.trim();
+  if (!text) { toast('Enter some text first', 'warning'); return; }
+  const size = parseInt($('text-size').value);
+  saveEditorHistory();
+  editorItems.push({ type: 'text', text, x: editorCanvas.width / 2 - 60, y: editorCanvas.height / 2, size, color: editorTextColor });
+  redrawEditor();
+  $('text-input').value = '';
+}
+
+function addSticker(emoji) {
+  saveEditorHistory();
+  editorItems.push({ type: 'sticker', emoji, x: Math.random() * (editorCanvas.width - 80) + 40, y: Math.random() * (editorCanvas.height - 80) + 40, size: 48 });
+  redrawEditor();
+}
+
+function saveEditorHistory() {
+  editorHistory.push(JSON.stringify(editorItems));
+  if (editorHistory.length > 20) editorHistory.shift();
+}
+
+function editorUndo() {
+  if (editorHistory.length === 0) { toast('Nothing to undo', 'info'); return; }
+  editorItems = JSON.parse(editorHistory.pop());
+  redrawEditor();
+}
+
+function resetEditor() {
+  if (!confirm('Reset all edits?')) return;
+  editorItems = []; editorHistory = []; editorFilter = 'none';
+  redrawEditor();
+}
+
+function clearEditorDraw() {
+  editorItems = editorItems.filter(i => i.type !== 'drawing');
+  redrawEditor();
+}
+
+function getEditorPos(e) {
+  const rect = editorCanvas.getBoundingClientRect();
+  const scaleX = editorCanvas.width / rect.width;
+  const scaleY = editorCanvas.height / rect.height;
+  return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+}
+
+function editorMouseDown(e) {
+  const pos = getEditorPos(e);
+  if (editorTool === 'pen') {
+    penDrawing = true;
+    saveEditorHistory();
+    editorItems.push({ type: 'drawing', color: editorPenColor, size: parseInt($('pen-size').value), points: [pos] });
+  } else if (editorTool === 'select') {
+    // Hit test items in reverse (top first)
+    selectedItem = null;
+    for (let i = editorItems.length - 1; i >= 0; i--) {
+      const item = editorItems[i];
+      if (item.type === 'sticker') {
+        const d = Math.hypot(pos.x - item.x, pos.y - item.y);
+        if (d < item.size) { selectedItem = i; editorDrag = { ox: pos.x - item.x, oy: pos.y - item.y }; break; }
+      } else if (item.type === 'text') {
+        if (pos.x >= item.x - 4 && pos.y <= item.y + 8 && pos.y >= item.y - item.size - 4) {
+          selectedItem = i; editorDrag = { ox: pos.x - item.x, oy: pos.y - item.y }; break;
+        }
+      }
+    }
+    redrawEditor();
+  }
+}
+
+function editorMouseMove(e) {
+  const pos = getEditorPos(e);
+  if (editorTool === 'pen' && penDrawing) {
+    const cur = editorItems[editorItems.length - 1];
+    if (cur?.type === 'drawing') { cur.points.push(pos); redrawEditor(); }
+  } else if (editorTool === 'select' && editorDrag !== null && selectedItem !== null) {
+    const item = editorItems[selectedItem];
+    item.x = pos.x - editorDrag.ox;
+    item.y = pos.y - editorDrag.oy;
+    redrawEditor();
+  }
+}
+
+function editorMouseUp() { penDrawing = false; editorDrag = null; }
+function editorTouchStart(e) { e.preventDefault(); editorMouseDown(e.touches[0]); }
+function editorTouchMove(e) { e.preventDefault(); editorMouseMove(e.touches[0]); }
+
+function downloadEdited() {
+  const a = document.createElement('a');
+  a.href = editorCanvas.toDataURL('image/png');
+  a.download = `togetherbooth-edited-${Date.now()}.png`;
+  a.click();
+}
+
+async function saveEditedToGallery() {
+  try {
+    await api('/api/photos', 'POST', {
+      dataUrl: editorCanvas.toDataURL('image/png'),
+      title: 'Edited Photo',
+      caption: ''
+    });
+    toast('Saved to memories!', 'success');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GALLERY
+// ═══════════════════════════════════════════════════════════════
+function renderGallery(list) {
+  galleryList = list || [];
+  updateGalleryView();
+}
+
+function filterGallery(filter, btn) {
+  galleryFilter = filter;
+  document.querySelectorAll('.gallery-filters .btn').forEach(b => {
+    b.classList.remove('btn-active');
+    b.classList.add('btn-secondary');
+  });
+  btn.classList.add('btn-active');
+  btn.classList.remove('btn-secondary');
+  updateGalleryView();
+}
+
+function updateGalleryView() {
+  const filtered = galleryFilter === 'fav'
+    ? galleryList.filter(p => p.isFavorite)
+    : galleryFilter === 'strip'
+      ? galleryList.filter(p => p.templateId)
+      : galleryList;
+
+  const grid = $('gallery-grid');
+  const empty = $('gallery-empty');
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) {
+    empty.classList.remove('hide');
+    return;
+  }
+  empty.classList.add('hide');
+
+  [...filtered].reverse().forEach(p => {
+    const item = document.createElement('div');
+    item.className = 'gallery-item';
+
+    const imgSrc = '/media/' + p.id;
+    item.innerHTML = `
+      <img src="${imgSrc}" alt="${escHtml(p.title)}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"100\\" height=\\"100\\"><rect fill=\\"#f0f0f0\\" width=\\"100\\" height=\\"100\\"/><text fill=\\"#aaa\\" x=\\"50\\" y=\\"55\\" text-anchor=\\"middle\\">📷</text></svg>'">
+      <div class="gallery-item-overlay">
+        <div class="gallery-item-title">${escHtml(p.title)}</div>
+        <div class="gallery-item-actions">
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;padding:4px 8px" onclick="event.stopPropagation();downloadPhoto('${p.id}','${p.ext}')">⬇️</button>
+          <button class="btn btn-sm" style="background:rgba(255,0,0,.4);color:#fff;padding:4px 8px" onclick="event.stopPropagation();deletePhoto('${p.id}')">🗑️</button>
+        </div>
+      </div>
+      <div class="gallery-fav" onclick="event.stopPropagation();toggleFav('${p.id}',${!p.isFavorite})">${p.isFavorite ? '❤️' : '🤍'}</div>`;
+    item.querySelector('img').onclick = () => openLightbox(imgSrc);
+    grid.appendChild(item);
+  });
+}
+
+function openLightbox(src) {
+  $('lightbox-img').src = src;
+  $('lightbox').classList.remove('hide');
+}
+function closeLightbox(e) {
+  if (!e || e.target === $('lightbox') || e.target.classList.contains('lightbox-close')) {
+    $('lightbox').classList.add('hide');
+  }
+}
+// Close lightbox on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (!$('lightbox').classList.contains('hide')) closeLightbox();
+    if (!$('game-modal').classList.contains('hide')) closeGame();
+  }
+});
+
+async function downloadPhoto(id, ext) {
+  const a = document.createElement('a');
+  a.href = '/media/' + id;
+  a.download = `memory-${id}.${ext}`;
+  a.click();
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Delete this memory for both of you?')) return;
+  try { await api('/api/photos/' + id, 'DELETE'); toast('Deleted', 'success'); }
+  catch (e) { toast(e.message, 'error'); }
+}
+
+async function toggleFav(id, val) {
+  try {
+    await api('/api/photos/' + id, 'PATCH', { isFavorite: val });
+    const p = galleryList.find(x => x.id === id);
+    if (p) { p.isFavorite = val; updateGalleryView(); }
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GAMES
+// ═══════════════════════════════════════════════════════════════
+const GAMES_DEF = [
+  { id: 'truth-dare', name: 'Truth or Dare', icon: '🎭', desc: 'Spin and answer or dare!',
+    dares: ['Do a funny dance for 10 seconds','Say a tongue twister 3 times fast','Do your best celebrity impression','Describe your partner in 5 emojis','Speak in an accent for the next 2 minutes','Do 10 jumping jacks','Sing the chorus of your favorite song','Tell your most embarrassing story'],
+    truths: ['What was your first impression of me?','What is your biggest fear?','What is the most romantic thing you\'ve ever done?','If you could live anywhere, where?','What is one thing you wish I knew about you?','What is your happiest memory with me?','What was your most embarrassing moment?','What did you want to be when you grew up?'] },
+  { id: 'pose-challenge', name: 'Pose Challenge', icon: '🤳', desc: 'Strike the pose shown!',
+    poses: ['🧘 Meditate like a monk','💃 Strike your best supermodel pose','🕵️ Pretend you\'re a spy','👑 Act like royalty','🦸 Strike a superhero pose','🎭 Your most dramatic face','🤠 Cowboy style!','🧙 Wizard casting a spell','🏄 Surfing the wave','🦩 Flamingo stance','🤖 Robot mode','🐱 Cat energy only'] },
+  { id: 'spin-wheel', name: 'Spin the Wheel', icon: '🎡', desc: 'Spin for a random activity!',
+    options: ['📸 Take a selfie!','💌 Send a sweet message','🎵 Share your current fav song','🌟 Give a compliment','😂 Tell a joke','🍕 Order food together','🎮 Play a mini-game','💕 Share a memory','🤸 Do a silly stretch','🎨 Draw something for each other'] },
+  { id: 'emoji-challenge', name: 'Emoji Expression', icon: '😄', desc: 'Express the emoji without words!',
+    emojis: ['😴','😤','🥺','🤩','😱','🥴','🤔','😏','🙄','😤','🥰','🤪','😤','🤯','🥶'] },
+  { id: 'question-cards', name: 'Question Cards', icon: '❓', desc: 'Deep & fun questions!',
+    questions: ['If you had a superpower, what would it be and why?','What\'s on your bucket list?','What\'s your love language?','What makes you feel most alive?','If you could time travel, where would you go?','What\'s your guilty pleasure?','What\'s something you\'ve never told anyone?','What would your ideal day look like?','What\'s a skill you\'d love to learn?','What\'s your favorite childhood memory?','If you wrote a book, what would it be about?','What\'s your biggest dream right now?'] },
+  { id: 'bingo', name: 'Photo Booth Bingo', icon: '🎯', desc: 'Complete the bingo card!',
+    squares: ['Silly face','Peace sign','Thumbs up','Eyes closed','Blowing a kiss','Looking away','Double chin 😂','Crossed eyes','Smiling with teeth','Pointing at camera','Heart hands','Hair in face','Forehead touch','Looking at each other','Natural laugh'] },
+  { id: 'memory-capsule', name: 'Memory Capsule', icon: '💌', desc: 'Write a message to future you!',
+    prompt: 'Write a little note to yourselves to open in 6 months. What are you grateful for right now? What do you hope for?' },
+  { id: 'gif-booth', name: 'GIF Photo Booth', icon: '🎥', desc: 'Make fun quick expressions!',
+    prompts: ['Shocked!','Laughing hysterically','Blowing a kiss','Doing a little dance','Acting suspicious','Your best wink','Totally surprised!','Victory pose!'] },
+  { id: 'draw-prompt', name: 'Drawing Duel', icon: '🎨', desc: 'Both draw the same prompt!',
+    prompts: ['A cat on the moon','Your dream home','A robot chef','An underwater city','A flying car','Your spirit animal','A magical forest','The best dessert ever'] },
+  { id: 'guess-expression', name: 'Guess the Expression', icon: '🎭', desc: 'Make a face, they guess!',
+    expressions: ['😂','🥺','😤','🤩','😱','🥴','😏','🙄','🤯','🥶','😍','🤠','👻','🤓','😈'] },
+];
+
+function initGames() {
+  const grid = $('games-grid');
+  GAMES_DEF.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'card game-card card-hover';
+    card.innerHTML = `<div class="game-icon">${g.icon}</div><div class="game-title">${g.name}</div><div class="game-desc">${g.desc}</div>`;
+    card.onclick = () => openGame(g.id);
+    grid.appendChild(card);
+  });
+}
+
+function openGame(id) {
+  const game = GAMES_DEF.find(g => g.id === id);
+  if (!game) return;
+  currentGame = game;
+  const modal = $('game-modal');
+  const content = $('game-content');
+  modal.classList.remove('hide');
+
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2>${game.icon} ${game.name}</h2>
+    <button class="btn btn-secondary btn-sm" onclick="closeGame()">✕ Close</button>
+  </div>`;
+
+  if (id === 'spin-wheel') {
+    html += `<canvas id="spin-canvas" width="300" height="300"></canvas>
+    <div class="spin-result" id="spin-result">Press spin!</div>
+    <div style="text-align:center;margin-top:12px"><button class="btn btn-primary" onclick="spinWheel()">🎡 Spin!</button></div>`;
+  } else if (id === 'truth-dare') {
+    html += `<p style="color:var(--text-muted);margin-bottom:16px">Take turns picking!</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" style="font-size:1.1rem;padding:16px 32px" onclick="pickTruthDare('truth')">💬 Truth</button>
+      <button class="btn btn-danger" style="font-size:1.1rem;padding:16px 32px" onclick="pickTruthDare('dare')">🔥 Dare</button>
+    </div>
+    <div id="td-result" class="card" style="margin-top:20px;text-align:center;font-size:1.1rem;min-height:80px;display:flex;align-items:center;justify-content:center;font-weight:700"></div>`;
+  } else if (id === 'pose-challenge' || id === 'emoji-challenge' || id === 'guess-expression' || id === 'gif-booth' || id === 'draw-prompt') {
+    const list = game.poses || game.emojis || game.expressions || game.prompts;
+    html += `<p style="color:var(--text-muted);margin-bottom:16px">${game.desc}</p>
+    <div id="game-prompt-display" class="card" style="text-align:center;font-size:2rem;font-weight:800;padding:32px;min-height:120px;display:flex;align-items:center;justify-content:center"></div>
+    <div style="text-align:center;margin-top:16px"><button class="btn btn-primary" onclick="nextGamePrompt()">🎲 Next</button></div>`;
+    setTimeout(() => nextGamePrompt(list), 100);
+  } else if (id === 'question-cards') {
+    html += `<div id="game-prompt-display" class="card" style="font-size:1.2rem;font-weight:700;padding:24px;min-height:100px;display:flex;align-items:center;justify-content:center;text-align:center"></div>
+    <div style="text-align:center;margin-top:16px"><button class="btn btn-primary" onclick="nextGamePrompt(${JSON.stringify(game.questions).replace(/</g,'&lt;')})">🃏 Next Question</button></div>`;
+    setTimeout(() => nextGamePrompt(game.questions), 100);
+  } else if (id === 'bingo') {
+    html += renderBingo(game.squares);
+  } else if (id === 'memory-capsule') {
+    html += `<p style="color:var(--text-muted);margin-bottom:16px">${game.prompt}</p>
+    <textarea id="capsule-text" style="width:100%;height:150px;resize:vertical" placeholder="Write your message here…"></textarea>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="saveCapsule()">💌 Save Capsule</button>
+      <button class="btn btn-secondary" onclick="clearCapsule()">🗑️ Clear</button>
+    </div>
+    <div id="capsule-status" style="margin-top:8px;font-size:.85rem;color:var(--text-muted)"></div>`;
+  }
+
+  html += `<div style="margin-top:16px;text-align:center"><button class="btn btn-secondary btn-sm" onclick="closeGame()">Close</button></div>`;
+  content.innerHTML = html;
+
+  if (id === 'spin-wheel') setTimeout(drawWheel, 100);
+  modal.onclick = e => { if (e.target === modal) closeGame(); };
+}
+
+function closeGame() {
+  $('game-modal').classList.add('hide');
+  currentGame = null;
+}
+
+function pickTruthDare(type) {
+  const game = GAMES_DEF.find(g => g.id === 'truth-dare');
+  const list = type === 'truth' ? game.truths : game.dares;
+  const item = list[Math.floor(Math.random() * list.length)];
+  $('td-result').textContent = (type === 'truth' ? '💬 ' : '🔥 ') + item;
+  socket.emit('game:update', { type: 'truth-dare', item, kind: type });
+}
+
+function nextGamePrompt(customList) {
+  const game = currentGame;
+  if (!game) return;
+  const list = customList || game.poses || game.emojis || game.expressions || game.prompts || game.questions;
+  const item = list[Math.floor(Math.random() * list.length)];
+  const el = $('game-prompt-display');
+  if (el) el.textContent = item;
+  socket.emit('game:update', { type: game.id, prompt: item });
+}
+
+function renderBingo(squares) {
+  const shuffled = [...squares].sort(() => Math.random() - .5).slice(0, 9);
+  let html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+  shuffled.forEach(s => {
+    html += `<div class="card" style="text-align:center;font-size:.8rem;padding:10px;cursor:pointer;transition:all .2s" onclick="this.style.background=this.style.background?'':'var(--pink)';this.style.color=this.style.color?'':'#fff'">${s}</div>`;
+  });
+  html += '</div><button class="btn btn-secondary btn-sm" onclick="openGame(\'bingo\')">🔄 New Card</button>';
+  return html;
+}
+
+// Spin wheel
+const WHEEL_COLORS = ['#f06292','#9c88ff','#ffb347','#4fc3f7','#81c784','#ff8a65','#ce93d8','#80cbc4','#fff176','#a5d6a7'];
+let spinAngle = 0, spinning = false;
+
+function drawWheel(angle = 0) {
+  const canvas = $('spin-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const opts = GAMES_DEF.find(g => g.id === 'spin-wheel').options;
+  const n = opts.length;
+  const arc = (Math.PI * 2) / n;
+  ctx.clearRect(0, 0, 300, 300);
+
+  opts.forEach((opt, i) => {
+    const a = i * arc + angle;
+    ctx.beginPath();
+    ctx.moveTo(150, 150);
+    ctx.arc(150, 150, 140, a, a + arc);
+    ctx.closePath();
+    ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(150, 150);
+    ctx.rotate(a + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px Nunito,sans-serif';
+    ctx.shadowColor = 'rgba(0,0,0,.3)';
+    ctx.shadowBlur = 2;
+    ctx.fillText(opt.slice(0, 18), 130, 4);
+    ctx.restore();
+  });
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(150, 150, 20, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#f06292';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Arrow
+  ctx.fillStyle = '#f06292';
+  ctx.beginPath();
+  ctx.moveTo(280, 150); ctx.lineTo(265, 143); ctx.lineTo(265, 157); ctx.closePath();
+  ctx.fill();
+}
+
+function spinWheel() {
+  if (spinning) return;
+  spinning = true;
+  const opts = GAMES_DEF.find(g => g.id === 'spin-wheel').options;
+  const duration = 3000 + Math.random() * 2000;
+  const extra = Math.PI * 2 * (6 + Math.floor(Math.random() * 6));
+  const start = performance.now();
+  const startAngle = spinAngle;
+
+  function frame(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    spinAngle = startAngle + extra * ease;
+    drawWheel(spinAngle);
+    if (t < 1) { requestAnimationFrame(frame); return; }
+    spinning = false;
+    const arc = (Math.PI * 2) / opts.length;
+    const idx = Math.floor((((-spinAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) / arc) % opts.length;
+    const result = opts[(opts.length - 1 - idx) % opts.length];
+    const resultEl = $('spin-result');
+    if (resultEl) resultEl.textContent = result;
+    socket.emit('game:update', { type: 'spin-wheel', result });
+    toast('Wheel says: ' + result, 'success', 4000);
+  }
+  requestAnimationFrame(frame);
+}
+
+function saveCapsule() {
+  const text = $('capsule-text')?.value.trim();
+  if (!text) { toast('Write something first!', 'warning'); return; }
+  localStorage.setItem('tb-capsule', JSON.stringify({ text, date: Date.now(), names: users.map(u => u.name) }));
+  const status = $('capsule-status');
+  if (status) status.textContent = '💌 Saved! Open it in 6 months.';
+  toast('Memory capsule saved!', 'success');
+}
+
+function clearCapsule() {
+  const el = $('capsule-text');
+  if (el) el.value = '';
+}
+
+function onGameState(state) {
+  if (!state) return;
+  // Sync game state to currently open game modal
+  const modal = $('game-modal');
+  if (modal.classList.contains('hide')) {
+    toast(`🎮 Game update from partner!`, 'info', 2000);
+    return;
+  }
+  if (state.type === 'truth-dare') {
+    const el = $('td-result');
+    if (el) el.textContent = (state.kind === 'truth' ? '💬 ' : '🔥 ') + state.item;
+  } else if (state.prompt) {
+    const el = $('game-prompt-display');
+    if (el) el.textContent = state.prompt;
+  } else if (state.result) {
+    const el = $('spin-result');
+    if (el) el.textContent = state.result;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  DRAWING BOARD
+// ═══════════════════════════════════════════════════════════════
+let drawMouseDown = false, drawLastX = 0, drawLastY = 0;
+
+function initDrawCanvas() {
+  drawCanvas = $('draw-canvas');
+  drawCtx = drawCanvas.getContext('2d');
+  drawCtx.lineCap = 'round';
+  drawCtx.lineJoin = 'round';
+
+  const getPos = e => {
+    const rect = drawCanvas.getBoundingClientRect();
+    const scaleX = drawCanvas.width / rect.width;
+    const scaleY = drawCanvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  };
+
+  const startDraw = e => {
+    e.preventDefault();
+    drawMouseDown = true;
+    const pos = getPos(e);
+    drawLastX = pos.x; drawLastY = pos.y;
+    drawCtx.beginPath();
+    drawCtx.arc(pos.x, pos.y, parseInt($('draw-size').value) / 2, 0, Math.PI * 2);
+    drawCtx.fillStyle = drawErasing ? '#ffffff' : drawColor;
+    drawCtx.fill();
+  };
+
+  const doDraw = e => {
+    e.preventDefault();
+    if (!drawMouseDown) return;
+    const pos = getPos(e);
+    drawCtx.beginPath();
+    drawCtx.moveTo(drawLastX, drawLastY);
+    drawCtx.lineTo(pos.x, pos.y);
+    drawCtx.strokeStyle = drawErasing ? '#ffffff' : drawColor;
+    drawCtx.lineWidth = parseInt($('draw-size').value);
+    drawCtx.globalCompositeOperation = drawErasing ? 'destination-out' : 'source-over';
+    drawCtx.stroke();
+    socket.emit('draw', { x1: drawLastX, y1: drawLastY, x2: pos.x, y2: pos.y, color: drawColor, size: parseInt($('draw-size').value), erase: drawErasing });
+    drawLastX = pos.x; drawLastY = pos.y;
+  };
+
+  const endDraw = () => { drawMouseDown = false; };
+
+  drawCanvas.addEventListener('mousedown', startDraw);
+  drawCanvas.addEventListener('mousemove', doDraw);
+  drawCanvas.addEventListener('mouseup', endDraw);
+  drawCanvas.addEventListener('mouseleave', endDraw);
+  drawCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  drawCanvas.addEventListener('touchmove', doDraw, { passive: false });
+  drawCanvas.addEventListener('touchend', endDraw);
+}
+
+function onRemoteDraw(d) {
+  if (!drawCtx) return;
+  drawCtx.beginPath();
+  drawCtx.moveTo(d.x1, d.y1);
+  drawCtx.lineTo(d.x2, d.y2);
+  drawCtx.strokeStyle = d.color;
+  drawCtx.lineWidth = d.size;
+  drawCtx.lineCap = 'round';
+  drawCtx.globalCompositeOperation = d.erase ? 'destination-out' : 'source-over';
+  drawCtx.stroke();
+}
+
+function toggleEraser() {
+  drawErasing = !drawErasing;
+  $('draw-eraser-btn').classList.toggle('btn-active', drawErasing);
+  drawCanvas.style.cursor = drawErasing ? 'cell' : 'crosshair';
+}
+
+function clearDraw() {
+  if (!confirm('Clear the drawing board for everyone?')) return;
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  socket.emit('draw:clear');
+}
+
+function downloadDrawing() {
+  const a = document.createElement('a');
+  // Create white background version
+  const tmp = document.createElement('canvas');
+  tmp.width = drawCanvas.width; tmp.height = drawCanvas.height;
+  const tCtx = tmp.getContext('2d');
+  tCtx.fillStyle = '#ffffff';
+  tCtx.fillRect(0, 0, tmp.width, tmp.height);
+  tCtx.drawImage(drawCanvas, 0, 0);
+  a.href = tmp.toDataURL('image/png');
+  a.download = `drawing-${Date.now()}.png`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════════
+boot();
+</script>
+</body>
+</html>
