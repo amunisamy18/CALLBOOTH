@@ -75,7 +75,7 @@ const setSession = (res, u) => {
   }
   save();
   res.cookie('sid', t, {
-    httpOnly: true, sameSite: 'strict',
+    httpOnly: true, sameSite: 'lax',
     secure: process.env.SECURE_COOKIE === '1',
     maxAge: 30 * 24 * 60 * 60 * 1000
   });
@@ -132,7 +132,7 @@ app.post('/api/logout', auth, (q, r) => {
   delete db.sessions[parseCookies(q.headers.cookie).sid];
   save();
   r.clearCookie('sid', {
-    httpOnly: true, sameSite: 'strict',
+    httpOnly: true, sameSite: 'lax',
     secure: process.env.SECURE_COOKIE === '1'
   });
   r.json({ ok: true });
@@ -155,7 +155,16 @@ app.post('/api/invite', auth, (q, r) => {
 
 // ── Config route (ICE servers) ────────────────────────────────────────────────
 app.get('/api/config', auth, (q, r) => {
-  const servers = [{ urls: process.env.STUN_URL || 'stun:stun.l.google.com:19302' }];
+  const servers = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' }
+  ];
+  if (process.env.STUN_URL && !servers.some(s => s.urls === process.env.STUN_URL)) {
+    servers.unshift({ urls: process.env.STUN_URL });
+  }
   if (process.env.TURN_URL) {
     servers.push({ urls: process.env.TURN_URL, username: process.env.TURN_USER, credential: process.env.TURN_PASS });
   }

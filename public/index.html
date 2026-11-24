@@ -669,6 +669,9 @@ input::placeholder,textarea::placeholder{color:var(--text-muted)}
 <script src="/socket.io/socket.io.js"></script>
 <script>
 'use strict';
+if (window.location.protocol === 'file:') {
+  alert('TogetherBooth cannot be opened directly as a file. Please open it through http://localhost:3000 in your browser.');
+}
 // ═══════════════════════════════════════════════════════════════
 //  GLOBALS & STATE
 // ═══════════════════════════════════════════════════════════════
@@ -685,13 +688,23 @@ let activeTab = 'video', typingTimer = null, currentGame = null;
 
 const $ = id => document.getElementById(id);
 const api = async (url, method = 'GET', body) => {
-  const r = await fetch(url, {
-    method, headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || r.statusText);
-  return j;
+  try {
+    const r = await fetch(url, {
+      method, headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || `Error ${r.status}: ${r.statusText}`);
+    return j;
+  } catch (err) {
+    if (window.location.protocol === 'file:') {
+      throw new Error('Opened as a local file. Please open via http://localhost:3000');
+    }
+    if (err.message && (err.message.includes('Failed to fetch') || err.name === 'TypeError')) {
+      throw new Error('Server connection lost. Please refresh or verify the server is running at http://localhost:3000.');
+    }
+    throw err;
+  }
 };
 const toast = (msg, type = 'info', duration = 3000) => {
   const el = document.createElement('div');
@@ -978,46 +991,123 @@ function goFullscreen() {
   $('tab-video').requestFullscreen?.();
 }
 
+let candidateQueue = [];
+
 function makePc() {
-  if (pc) pc.close();
+  if (pc) {
+    try { pc.close(); } catch {}
+  }
+  candidateQueue = [];
   pc = new RTCPeerConnection(iceCfg);
-  if (localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-  pc.onicecandidate = e => e.candidate && socket.emit('signal', { cand: e.candidate });
-  pc.ontrack = e => { $('remote-video').srcObject = e.streams[0]; };
-  pc.onconnectionstatechange = () => {
-    const s = pc.connectionState;
-    $('call-status').textContent = 'Call: ' + s;
-    $('call-status').className = 'call-status' + (s === 'connected' ? ' active' : '');
-    $('btn-hang').disabled = false;
-    if (s === 'failed') { pc.restartIce(); toast('Connection issue, attempting ICE restart…', 'warning'); }
+  if (localStream) {
+    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  }
+  pc.onicecandidate = e => {
+    if (e.candidate) {
+      socket.emit('signal', { cand: e.candidate.toJSON ? e.candidate.toJSON() : e.candidate });
+    }
   };
+  pc.ontrack = e => {
+    const remoteVideo = $('remote-video');
+    if (remoteVideo) {
+      if (e.streams && e.streams[0]) {
+        remoteVideo.srcObject = e.streams[0];
+      } else {
+        if (!remoteVideo.srcObject) remoteVideo.srcObject = new MediaStream();
+        remoteVideo.srcObject.addTrack(e.track);
+      }
+    }
+  };
+  const updateStatus = () => {
+    const s = pc.connectionState || pc.iceConnectionState;
+    $('call-status').textContent = 'Call: ' + s;
+    const isConn = s === 'connected' || pc.iceConnectionState === 'connected';
+    $('call-status').className = 'call-status' + (isConn ? ' active' : '');
+    $('btn-hang').disabled = !isConn && s !== 'connecting';
+  };
+  pc.onconnectionstatechange = async () => {
+    updateStatus();
+    if (pc.connectionState === 'failed') {
+      toast('Reconnecting video call…', 'warning');
+      try {
+        const offer = await pc.createOffer({ iceRestart: true });
+        await pc.setLocalDescription(offer);
+        socket.emit('signal', { desc: pc.localDescription });
+      } catch (err) {
+        console.warn('ICE restart offer failed:', err);
+      }
+    }
+  };
+  pc.oniceconnectionstatechange = updateStatus;
 }
 
 async function startCall() {
   if (!localStream) await startCamera();
   makePc();
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  socket.emit('signal', { desc: pc.localDescription });
+  try {
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    socket.emit('signal', { desc: pc.localDescription });
+    $('call-status').textContent = 'Calling…';
+  } catch (err) {
+    toast('Could not initiate call: ' + err.message, 'error');
+  }
 }
 
 async function onSignal(d) {
-  if (d.desc) {
-    if (!pc) { if (!localStream) await startCamera(); makePc(); }
-    await pc.setRemoteDescription(d.desc);
-    if (d.desc.type === 'offer') {
-      const ans = await pc.createAnswer();
-      await pc.setLocalDescription(ans);
-      socket.emit('signal', { desc: pc.localDescription });
+  try {
+    if (d.desc) {
+      if (!pc) {
+        if (!localStream) await startCamera();
+        makePc();
+      }
+      const isOffer = d.desc.type === 'offer';
+      const offerCollision = isOffer && (pc.signalingState !== 'stable' || pc.localDescription);
+      const polite = String(me) < String(d.from || '');
+      if (offerCollision && !polite) {
+        return;
+      }
+      await pc.setRemoteDescription(new RTCSessionDescription(d.desc));
+      while (candidateQueue.length > 0) {
+        const cand = candidateQueue.shift();
+        try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) { console.warn('Queued candidate error:', e); }
+      }
+      if (isOffer) {
+        if (!localStream) await startCamera();
+        if (localStream && pc) {
+          localStream.getTracks().forEach(t => {
+            const has = pc.getSenders().some(s => s.track?.kind === t.kind);
+            if (!has) pc.addTrack(t, localStream);
+          });
+        }
+        const ans = await pc.createAnswer();
+        await pc.setLocalDescription(ans);
+        socket.emit('signal', { desc: pc.localDescription });
+      }
+    } else if (d.cand) {
+      if (pc && pc.remoteDescription && pc.remoteDescription.type) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(d.cand));
+        } catch (e) {
+          console.warn('addIceCandidate error:', e);
+        }
+      } else {
+        candidateQueue.push(d.cand);
+      }
     }
-  } else if (d.cand && pc) {
-    try { await pc.addIceCandidate(d.cand); } catch {}
+  } catch (err) {
+    console.error('Signaling handling error:', err);
   }
 }
 
 function closePc() {
-  pc?.close(); pc = null;
-  $('remote-video').srcObject = null;
+  candidateQueue = [];
+  if (pc) {
+    try { pc.close(); } catch {}
+    pc = null;
+  }
+  const rv = $('remote-video');
+  if (rv) rv.srcObject = null;
   $('call-status').textContent = 'Call ended';
   $('call-status').className = 'call-status';
   $('btn-hang').disabled = true;
