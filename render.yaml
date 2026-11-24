@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: togetherbooth
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SECURE_COOKIE
+        value: "1"
+      - key: MAX_ROUNDS
+        value: "6"
